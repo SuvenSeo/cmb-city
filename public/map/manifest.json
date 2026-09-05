@@ -1,0 +1,119 @@
+{
+  "origin": [
+    79.85832,
+    6.92703
+  ],
+  "metresPerUnit": 1,
+  "buildings": 43570,
+  "distantBuildings": 61383,
+  "coreAreaKm2": 22.617,
+  "trees": 10025,
+  "core": {
+    "triangles": 1753200,
+    "batches": 759
+  },
+  "distant": {
+    "triangles": 987564,
+    "batches": 96
+  },
+  "cameras": [
+    {
+      "name": "Camera 01 | Reference-inspired aerial",
+      "location": [
+        390,
+        570,
+        230
+      ],
+      "target": [
+        35,
+        -60,
+        180
+      ],
+      "lens": 64
+    },
+    {
+      "name": "Camera 02 | City and lake overview",
+      "location": [
+        1050,
+        850,
+        800
+      ],
+      "target": [
+        -180,
+        -500,
+        70
+      ],
+      "lens": 46
+    },
+    {
+      "name": "Camera 03 | Across Beira Lake",
+      "location": [
+        -430,
+        -440,
+        74
+      ],
+      "target": [
+        0,
+        0,
+        167
+      ],
+      "lens": 32
+    }
+  ],
+  "sources": [
+    {
+      "name": "OpenStreetMap contributors",
+      "url": "https://www.openstreetmap.org/copyright",
+      "use": "Roads, waterways, railways, green spaces; ODbL"
+    },
+    {
+      "name": "CMC / NSDI",
+      "url": "https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/CMC/MapServer",
+      "use": "Building footprints and floor counts; survey date unspecified"
+    },
+    {
+      "name": "Overture Maps",
+      "url": "https://docs.overturemaps.org/guides/buildings/",
+      "use": "Building footprints and available heights; 2026-08-19 release"
+    },
+    {
+      "name": "Mapzen Terrain Tiles",
+      "url": "https://github.com/tilezen/joerd/blob/master/docs/attribution.md",
+      "use": "Elevation; includes SRTM and other open elevation sources"
+    },
+    {
+      "name": "Poly Haven",
+      "url": "https://polyhaven.com/",
+      "use": "CC0 daylight environment and asphalt/concrete textures"
+    },
+    {
+      "name": "Safdie Architects \u2014 Altair",
+      "url": "https://www.safdiearchitects.com/projects/altair-residences",
+      "use": "Visual reference for the approximate twin-tower silhouette"
+    }
+  ],
+  "accuracy": "Mapped layout and source or estimated heights. Facades, tree planting, landmark details and distant ground elevation are approximate.",
+  "rendering": "Browser export uses baked facade cells, shared canopy prototypes and WebGL lighting in place of Blender procedural shading and Cycles.",
+  "assets": {
+    "core": {
+      "url": "/map/core.glb",
+      "bytes": 28566376
+    },
+    "distant": {
+      "url": "/map/distant.glb",
+      "bytes": 18780728
+    },
+    "canopies": {
+      "url": "/map/canopies.glb",
+      "bytes": 56544
+    },
+    "trees": {
+      "url": "/map/trees.json",
+      "bytes": 533786
+    },
+    "tower": {
+      "url": "/map/lotus-tower.glb",
+      "bytes": 1693320
+    }
+  }
+}
