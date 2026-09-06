@@ -1,0 +1,9 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/map/*.glb
+  Content-Type: model/gltf-binary
+
+/landmarks/*.glb
+  Content-Type: model/gltf-binary

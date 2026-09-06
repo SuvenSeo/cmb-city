@@ -6,6 +6,8 @@ The idea is simple. Open the map, put on some radio, and spend a little time in 
 Move around Beira Lake, get closer to Lotus Tower, or explore the old railway station.
 Change the light, bring in some rain, and see the city from another angle.
 
+**[Explore Colombo Atlas](https://colombo.prabhavalabs.com)**
+
 ![Colombo Atlas showing Lotus Tower, Beira Lake and the surrounding city](docs/images/colombo-city.jpg)
 
 ## What you can do
@@ -120,6 +122,9 @@ expect a root deployment, rather than a nested path such as `/colombo-atlas/`.
 | `docs/` | Screenshots and model-building notes |
 
 For rebuilding the models or adjusting their details, see [Working with the models](docs/MODELS.md).
+
+The live site runs on Cloudflare Pages, with R2 serving the larger map and download
+files. See [Deploying Colombo Atlas](docs/DEPLOYMENT.md) for the setup and update command.
 
 ## Credits and accuracy
 
