@@ -18,46 +18,46 @@
   },
   "cameras": [
     {
-      "name": "Camera 01 | Reference-inspired aerial",
+      "name": "Camera 01 | Lotus Tower and Beira Lake",
       "location": [
-        390,
         570,
-        230
+        760,
+        930
       ],
       "target": [
-        35,
-        -60,
-        180
+        -55,
+        20,
+        55
       ],
-      "lens": 64
+      "lens": 58
     },
     {
-      "name": "Camera 02 | City and lake overview",
+      "name": "Camera 02 | Colombo city overview",
       "location": [
-        1050,
-        850,
-        800
+        1100,
+        1200,
+        1800
       ],
       "target": [
-        -180,
-        -500,
-        70
+        100,
+        -350,
+        50
       ],
-      "lens": 46
+      "lens": 55
     },
     {
       "name": "Camera 03 | Across Beira Lake",
       "location": [
-        -430,
-        -440,
-        74
+        -720,
+        -350,
+        170
       ],
       "target": [
         0,
         0,
-        167
+        175
       ],
-      "lens": 32
+      "lens": 38
     }
   ],
   "sources": [
@@ -93,7 +93,7 @@
     }
   ],
   "accuracy": "Mapped layout and source or estimated heights. Facades, tree planting, landmark details and distant ground elevation are approximate.",
-  "rendering": "Browser export uses baked facade cells, shared canopy prototypes and WebGL lighting in place of Blender procedural shading and Cycles.",
+  "rendering": "Architectural city atlas with a restrained material palette, a procedural cloud sky and sun, cached environment lighting and sun shadows, simulated weather, and reflective lake water with wind waves and rain ripples. Building geometry and the mapped shoreline are retained; weather, water color and lighting are illustrative.",
   "assets": {
     "core": {
       "url": "/map/core.glb",

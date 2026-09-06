@@ -1,0 +1,198 @@
+[
+  {
+    "name": "Altair",
+    "position": [
+      -414,
+      0,
+      896
+    ],
+    "rotation": 0,
+    "mask": [
+      -478,
+      -849,
+      -349,
+      -939
+    ],
+    "description": "69-level vertical tower, stepped leaning leg, diagonal concrete frame, garden terraces, retail podium and sky garden.",
+    "reference": "https://www.safdiearchitects.com/projects/altair-residences",
+    "id": "altair",
+    "triangles": 67996,
+    "mapTriangles": 40132,
+    "bounds": [
+      [
+        -61.5,
+        -40.0,
+        0.0
+      ],
+      [
+        61.5,
+        40.0,
+        240.89999389648438
+      ]
+    ],
+    "bytes": 384836,
+    "downloadBytes": 3628077
+  },
+  {
+    "name": "World Trade Center",
+    "position": [
+      -1599,
+      8,
+      -633
+    ],
+    "rotation": 0,
+    "mask": [
+      -1653,
+      674,
+      -1546,
+      588
+    ],
+    "description": "Twin curved office towers with 39 tower levels, a four-level podium, articulated glass panels, stone bands and an entrance canopy.",
+    "reference": "https://wtc.lk/about/",
+    "id": "wtc",
+    "triangles": 108936,
+    "mapTriangles": 71400,
+    "bounds": [
+      [
+        -53.0,
+        -50.5,
+        0.0
+      ],
+      [
+        53.0,
+        32.5,
+        153.60000610351562
+      ]
+    ],
+    "bytes": 778728,
+    "downloadBytes": 4072467
+  },
+  {
+    "name": "Gangaramaya Temple",
+    "position": [
+      -190,
+      0,
+      1169
+    ],
+    "rotation": -1.5707963267948966,
+    "mask": [
+      -230,
+      -1124,
+      -139,
+      -1215
+    ],
+    "description": "Main land-based temple compound with an ornate white gateway, gilded roof trim, dagoba, Bodhi enclosure and a terraced sculpture court.",
+    "reference": "https://gangaramaya.com/about-us/",
+    "id": "gangaramaya",
+    "triangles": 56487,
+    "mapTriangles": 42898,
+    "bounds": [
+      [
+        -37.0,
+        -43.0,
+        0.0
+      ],
+      [
+        37.16999816894531,
+        43.0,
+        17.799999237060547
+      ]
+    ],
+    "bytes": 240280,
+    "downloadBytes": 3402730
+  },
+  {
+    "name": "Colombo Fort Station",
+    "position": [
+      -951,
+      -1,
+      -723
+    ],
+    "rotation": 3.056592653589793,
+    "mask": [
+      -1087,
+      792,
+      -813,
+      641
+    ],
+    "description": "Curved clock pediment, shaped Sinhala lettering, scalloped canopy, Olcott memorial, ticket hall, lattice roof trusses and three footbridges.",
+    "reference": "https://railway.gov.lk/",
+    "id": "fort",
+    "files": [
+      "fort.blend",
+      "fort.glb",
+      "map.glb",
+      "preview.png",
+      "detail.png",
+      "README.md",
+      "interior.png",
+      "cutaway.png",
+      "REFERENCES.md",
+      "FONT-LICENSE.txt"
+    ],
+    "interiors": true,
+    "triangles": 160516,
+    "mapTriangles": 66964,
+    "bounds": [
+      [
+        -125.0,
+        -55.0,
+        0.0
+      ],
+      [
+        125.0,
+        71.0,
+        16.275001525878906
+      ]
+    ],
+    "bytes": 512092,
+    "downloadBytes": 8192297
+  },
+  {
+    "name": "Colombo National Museum",
+    "position": [
+      291,
+      6,
+      1833
+    ],
+    "rotation": -0.185,
+    "mask": [
+      243,
+      -1773,
+      341,
+      -1892
+    ],
+    "description": "Italianate arcades, fanlight sash windows, rusticated portico, carved capitals, urn finials and a furnished interior with a bifurcated timber staircase.",
+    "reference": "https://www.museum.gov.lk/",
+    "id": "museum",
+    "files": [
+      "museum.blend",
+      "museum.glb",
+      "map.glb",
+      "preview.png",
+      "detail.png",
+      "README.md",
+      "interior.png",
+      "cutaway.png",
+      "REFERENCES.md",
+      "FONT-LICENSE.txt"
+    ],
+    "interiors": true,
+    "triangles": 307788,
+    "mapTriangles": 56063,
+    "bounds": [
+      [
+        -39.0,
+        -52.5,
+        0.0
+      ],
+      [
+        39.0,
+        52.5,
+        15.690350532531738
+      ]
+    ],
+    "bytes": 529656,
+    "downloadBytes": 11830668
+  }
+]

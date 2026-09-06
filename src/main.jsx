@@ -3,6 +3,10 @@ import '@fontsource/dm-sans/latin-400.css';
 import '@fontsource/dm-sans/latin-500.css';
 import '@fontsource/dm-sans/latin-600.css';
 import '@fontsource/rajdhani/latin-500.css';
+import '@fontsource/abhaya-libre/sinhala-600.css';
+import '@fontsource/abhaya-libre/sinhala-700.css';
+import '@fontsource/noto-sans-tamil/tamil-400.css';
+import '@fontsource/noto-sans-tamil/tamil-500.css';
 import Map from './Map.jsx';
 import './map.css';
 

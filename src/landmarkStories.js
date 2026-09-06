@@ -1,0 +1,51 @@
+// Names are displayed in all three languages; the historical descriptions are in English.
+export const LANDMARK_STORIES = {
+  lotus: {
+    tamil:'கொழும்பு தாமரை கோபுரம்', era:'Opened to visitors · 2022', category:'Observation & communications',
+    introduction:'A lotus blossom above Beira Lake, bringing the city’s skyline and waterfront into one view.',
+    history:'Construction began in 2012, and the tower opened to the public on 15 September 2022. The project combines broadcasting infrastructure with spaces for visitors, exhibitions and hospitality.',
+    architecture:'A slender stem rises to a rounded tower house wrapped in petal forms. The lotus silhouette gives the building its identity, while observation spaces look across the lake, the Indian Ocean and the city.',
+    significance:'The tower connects a familiar floral symbol with contemporary engineering. Its observation deck offers a way to understand Colombo’s geography from above.',
+    sources:[{label:'Lotus Tower · official history',url:'https://colombolotustower.lk/ta/our-story/'}],
+  },
+  altair: {
+    tamil:'அல்டெயர்', era:'Completed · 2021', category:'Residential architecture',
+    introduction:'Two towers in conversation: one upright, the other stepping toward it above the lake.',
+    history:'Designed by Safdie Architects for Indocean Developers, Altair is recorded by the architect as a completed 2021 project. The development brings residential towers and a waterfront retail promenade to Beira Lake.',
+    architecture:'A leaning tower meets a vertical tower, creating a cascade of garden terraces. The diagonal structural frame supports open interior layouts, while the paired forms allow apartments to receive light and cross-ventilation.',
+    significance:'Altair explores how a tall residential building can offer outdoor space and a relationship with the waterfront. The terraces and shared sky garden are central to that idea.',
+    sources:[{label:'Safdie Architects · Altair Residences',url:'https://www.safdiearchitects.com/projects/altair-residences'}],
+  },
+  gangaramaya: {
+    tamil:'கங்காராமய விகாரை', era:'Founded · late 19th century', category:'Buddhist temple & learning',
+    introduction:'A living place of worship, learning and cultural activity within Colombo’s busy streets.',
+    history:'The temple traces its beginnings to the scholar monk Hikkaduwe Sri Sumangala Nayaka Thera in the late nineteenth century. Later generations developed its religious, educational and community work.',
+    architecture:'The main temple is a compound of shrines, courtyards, sculpture and museum collections, rather than a single hall. This model represents the land-based compound; the separate Seema Malaka pavilion stands on Beira Lake.',
+    significance:'Gangaramaya combines daily religious practice with teaching and community services. Its collections and ceremonial spaces reflect the many roles a city temple can play.',
+    sources:[{label:'Gangaramaya · official history',url:'https://gangaramaya.com/about/'},{label:'Gangaramaya · temple and services',url:'https://gangaramaya.com/'}],
+  },
+  wtc: {
+    tamil:'உலக வர்த்தக மையம்', era:'Opened · 1997', category:'Commercial landmark',
+    introduction:'A pair of office towers marking the commercial heart of Colombo Fort.',
+    history:'The World Trade Center Colombo formally opened on 12 October 1997. Its developer’s archive follows construction from the early 1990s through the opening of the completed complex.',
+    architecture:'Two 39-storey office towers are joined by a four-storey retail podium. Repeating horizontal bands and curved glazed faces give the pair a unified appearance while the podium connects them at street level.',
+    significance:'The complex houses local and international businesses and participates in the World Trade Centers Association network. Its twin silhouette has become a recognizable part of the Fort skyline.',
+    sources:[{label:'World Trade Center Colombo · official history',url:'https://wtc.lk/about/'}],
+  },
+  fort: {
+    tamil:'கொழும்பு கோட்டை புகையிரத நிலையம்', era:'Opened · 1917', category:'Railway heritage',
+    introduction:'A historic entrance to the city, where an ornate clock façade meets the daily rhythm of rail travel.',
+    history:'Colombo Fort station opened in 1917. The public ticket hall leads toward the platforms, with footbridges connecting the station’s different boarding areas. The forecourt also contains a memorial to Henry Steel Olcott.',
+    architecture:'The street façade is distinguished by its curved clock pediment, balustrades and scalloped canopy. Behind it, long platform roofs rest on slender columns and metal trusses. Sinhala and English signs make the entrance immediately recognizable.',
+    significance:'Fort is a major point of arrival, departure and interchange in Colombo. The station brings an everyday public service into a building whose historic character remains visible from the street.',
+    sources:[{label:'Seat 61 · station guide and photographs',url:'https://www.seat61.com/SriLanka.htm#colombo-fort-station'},{label:'Station reconstruction · visual references',url:'/landmarks/fort/REFERENCES.md'}],
+  },
+  museum: {
+    tamil:'கொழும்பு தேசிய அருங்காட்சியகம்', era:'Founded · 1877', category:'National heritage & collections',
+    introduction:'White arcades, shaded verandas and galleries devoted to Sri Lanka’s cultural heritage.',
+    history:'The Colombo Museum opened on 1 January 1877 under Governor William Henry Gregory. Public Works Department architect J. G. Smither prepared the Italian-style design, and construction was completed in 1876.',
+    architecture:'A symmetrical two-storey façade brings together a three-arched portico, classical pediments, balustrades and deep upper verandas. Inside, a broad wooden stair reaches a landing and divides into two returning flights.',
+    significance:'The museum preserves and presents Sri Lanka’s cultural and natural heritage. Its ground-floor galleries follow a historical sequence, while upper galleries are organized around themes.',
+    sources:[{label:'Sri Lanka Tourism · National Museum',url:'https://srilanka.travel/national-museum'},{label:'Explore Sri Lanka · architecture and interiors',url:'https://exploresrilanka.lk/the-colombo-national-museum/'}],
+  },
+};

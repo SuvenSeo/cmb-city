@@ -1,0 +1,47 @@
+{
+  "name": "Colombo Fort Station",
+  "position": [
+    -951,
+    -1,
+    -723
+  ],
+  "rotation": 3.056592653589793,
+  "mask": [
+    -1087,
+    792,
+    -813,
+    641
+  ],
+  "description": "Curved clock pediment, shaped Sinhala lettering, scalloped canopy, Olcott memorial, ticket hall, lattice roof trusses and three footbridges.",
+  "reference": "https://railway.gov.lk/",
+  "id": "fort",
+  "files": [
+    "fort.blend",
+    "fort.glb",
+    "map.glb",
+    "preview.png",
+    "detail.png",
+    "README.md",
+    "interior.png",
+    "cutaway.png",
+    "REFERENCES.md",
+    "FONT-LICENSE.txt"
+  ],
+  "interiors": true,
+  "triangles": 160516,
+  "mapTriangles": 66964,
+  "bounds": [
+    [
+      -125.0,
+      -55.0,
+      0.0
+    ],
+    [
+      125.0,
+      71.0,
+      16.275001525878906
+    ]
+  ],
+  "bytes": 512092,
+  "downloadBytes": 8192297
+}
