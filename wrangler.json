@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "colombo-atlas",
   "pages_build_output_dir": "./dist",
-  "compatibility_date": "2026-09-07",
+  "compatibility_date": "2026-09-01",
   "r2_buckets": [
     { "binding": "LARGE_ASSETS", "bucket_name": "colombo-atlas-assets" }
   ]
