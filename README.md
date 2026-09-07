@@ -13,7 +13,7 @@ Change the light, bring in some rain, and see the city from another angle.
 ## What you can do
 
 - **Explore the city in 3D.** Drag to rotate, scroll or pinch to zoom, and switch between aerial, city and lakeside views. The compass shows which direction you are facing.
-- **Get to know the landmarks.** Pick a place to move to its own camera view and open a card about its history, architecture and significance. Names appear in Sinhala, Tamil and English, with coordinates below.
+- **Get to know the landmarks.** Pick a place and fly straight to its own camera view. Once you arrive, tap the small story prompt to read about its history, architecture and significance. Names appear in Sinhala, Tamil and English, with coordinates below.
 - **Set the mood.** Try morning light, soft daylight or golden hour. Choose clear skies, clouds, rain, heavy rain or a thunderstorm. The sky, shadows, water and surface wetness change together.
 - **Put on some radio.** Listen to Gold FM, Sun FM or Hiru FM. Sirasa FM opens in its official player. There are English and Sinhala filters, volume controls and a stop button.
 - **See Colombo's current temperature.** The small weather badge uses Open-Meteo. It shows real conditions in Colombo; the weather controls let you choose the atmosphere of the 3D scene.
@@ -78,7 +78,8 @@ listens only on your own computer.
 | Zoom | Pinch, scroll, or use the model viewer's + / − buttons |
 | Find a landmark | Click a map tag or open **Explore places** |
 | Restore the camera | Press the reset button |
-| Read a place's story | Select it, or choose **About this place** |
+| Read a place's story | Fly to it, then choose **Tap for its story** |
+| Find controls on a small screen | Open **Menu** for places, weather, lighting, views, radio and downloads |
 | Inspect and download an object | Open **3D model library**, then **Downloads** |
 | Start or pause rain and water motion | Use the atmosphere play / pause button |
 | Navigate without a mouse | Use Tab, arrow keys and Escape; the model canvas also supports + / − and Home |
@@ -91,7 +92,8 @@ resolution is capped, and hidden tabs pause their rendering.
 
 The model library loads one detailed object at a time and pauses the city behind
 it. Closing the library releases its graphics resources. Mobile layouts have
-scrollable panels and an expanded model view.
+scrollable panels and an expanded model view. On small screens, the map controls
+stay inside one menu, leaving more room to explore the city.
 
 The city is still a fairly detailed 3D scene. The main map loads about 33 MB of
 models and placement data, followed by about 19 MB for the distant skyline.

@@ -163,7 +163,7 @@ export function createMap(container,callbacks) {
   function setCamera(index,animate=true) {
     if(!metadata)return;
     const preset=metadata.cameras[index];if(!preset)return;
-    activeLandmark=null;callbacks.onLandmark?.(null);
+    activeLandmark=null;callbacks.onLandmark?.(null);callbacks.onArrival?.(null);
     clearOrbitMomentum(controls);
     activeCamera=index;lens=preset.lens;
     const position=new V(...blenderToThree(preset.location)),target=new V(...blenderToThree(preset.target));
@@ -180,7 +180,7 @@ export function createMap(container,callbacks) {
     const position=new V(...(portrait&&place.mobileView||place.view)),target=new V(...place.target);
     if(!reducedMotion.matches)motion={start:performance.now(),fromPosition:camera.position.clone(),fromTarget:controls.target.clone(),position,target};
     else{camera.position.copy(position);controls.target.copy(target);motion=null;controls.update();}
-    callbacks.onCamera(null);callbacks.onLandmark?.(id);resize();invalidate();
+    callbacks.onCamera(null);callbacks.onLandmark?.(id);callbacks.onArrival?.(motion?null:id);resize();invalidate();
   }
 
   function updateNavigation(){
@@ -211,7 +211,7 @@ export function createMap(container,callbacks) {
     canvas.dataset.renderPixels=String(canvas.width*canvas.height);water?.invalidate();invalidate();
   }
   const observer=new ResizeObserver(resize);observer.observe(container);resize();
-  controls.addEventListener('start',()=>{motion=null;interacting=true;invalidate();});
+  controls.addEventListener('start',()=>{motion=null;callbacks.onArrival?.(activeLandmark);interacting=true;invalidate();});
   controls.addEventListener('end',()=>{interacting=false;invalidate();});
   controls.addEventListener('change',invalidate);
   function onVisibility(){if(document.hidden){cancelAnimationFrame(raf);raf=0;}else{lastFrame=0;invalidate();}}
@@ -233,7 +233,7 @@ export function createMap(container,callbacks) {
     if(motion){
       const t=Math.min(1,(now-motion.start)/1100),e=t*t*(3-2*t);
       camera.position.lerpVectors(motion.fromPosition,motion.position,e);controls.target.lerpVectors(motion.fromTarget,motion.target,e);
-      if(t===1)motion=null;dirty=true;
+      if(t===1){motion=null;callbacks.onArrival?.(activeLandmark);}dirty=true;
     }
     const settling=controls.update();
     if(settling)dirty=true;

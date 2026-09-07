@@ -34,7 +34,7 @@ export default function RadioPlayer(){
     return()=>document.removeEventListener('pointerdown',outside);
   },[open]);
   function close(){setOpen(false);trigger.current?.focus();}
-  return <section className="city-radio" aria-label="Sri Lankan radio" ref={root} onKeyDown={event=>{if(event.key==='Escape'){event.stopPropagation();close();}}}>
+  return <section className="city-radio" aria-label="Sri Lankan radio" ref={root} onKeyDown={event=>{if(event.key==='Escape'&&open){event.preventDefault();event.stopPropagation();close();}}}>
     <div ref={audioHost} hidden />
     <div className="radio-mini">
       <button className="radio-toggle" onClick={()=>active?stop():tune(station)} aria-label={active?'Stop radio':`Play ${station.name} radio`}>

@@ -1,17 +1,19 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {Building2, Camera, Cloud, CloudDrizzle, CloudLightning, CloudRain, CloudSun, Maximize, Pause, Play, RotateCcw, Sun, Sunrise, Sunset, TreePine, Waves, X, Zap} from 'lucide-react';
+import {ArrowUpRight, Building2, Camera, Cloud, CloudDrizzle, CloudLightning, CloudRain, CloudSun, Eye, Maximize, Menu, Pause, Play, RotateCcw, Sun, Sunrise, Sunset, TreePine, Waves, X, Zap} from 'lucide-react';
 import {createMap} from './createMap.js';
 import {WEATHER_PRESETS} from './weatherPresets.js';
 import SceneSelect from './SceneSelect.jsx';
 import RadioPlayer from './RadioPlayer.jsx';
 import WeatherBadge from './WeatherBadge.jsx';
 import CityNavigation from './CityNavigation.jsx';
+import CityPlaces from './CityPlaces.jsx';
 import {LANDMARKS} from './landmarks.js';
 import {coordinateLabel} from './cityNavigation.js';
 import ModelLibrary from './ModelLibrary.jsx';
 import LandmarkDetails from './LandmarkDetails.jsx';
 import {LANDMARK_STORIES} from './landmarkStories.js';
 
+const compactQuery = '(max-width: 760px), (max-height: 500px) and (max-width: 1100px)';
 const cameraNames = ['Aerial', 'City overview', 'Lakeside'];
 const cameraIcons = [Camera, Building2, Waves];
 const lightingOptions = [
@@ -24,7 +26,9 @@ const weatherOptions = Object.entries(WEATHER_PRESETS).map(([value,preset]) => (
 
 export default function Map() {
   const stage = useRef(null), viewer = useRef(null), credits = useRef(null), cameraTabs = useRef([]);
-  const navigation=useRef(null),library=useRef(null);
+  const navigation=useRef(null),library=useRef(null),menu=useRef(null),menuTrigger=useRef(null);
+  const [compact,setCompact]=useState(()=>matchMedia(compactQuery).matches);
+  const [menuOpen,setMenuOpen]=useState(false),[showTags,setShowTags]=useState(true),[arrived,setArrived]=useState(null);
   const [infoId,setInfoId]=useState(null),[libraryOpen,setLibraryOpen]=useState(false);
   const infoPlace=LANDMARKS.find(place=>place.id===infoId);
   const [landmark,setLandmark]=useState(null);
@@ -59,19 +63,46 @@ export default function Map() {
         onMetadata: m => active && setMetadata(m),
         onBackground: s => active && setBackground(s),
         onAnimation: enabled => active && setAnimated(enabled),
-        onLandmark: id => active && setLandmark(id),
+        onLandmark: id => {if(active){setLandmark(id);setArrived(null);}},
+        onArrival: id => active && setArrived(id),
         onView: view => active && navigation.current?.update(view),
       });
     } catch (failure) { setError(failure.message); }
     return () => { active = false; preference.removeEventListener('change', preferenceChanged); viewer.current?.dispose(); viewer.current = null; };
   }, []);
 
-  // A place card keeps its landmark visible while the camera finishes moving.
-  // The separate model studio pauses the city to avoid rendering two scenes.
   useEffect(()=>{viewer.current?.suspend(libraryOpen);},[libraryOpen]);
-  function explorePlace(id){viewer.current?.landmark(id);setInfoId(id);}
+  useEffect(()=>{
+    const media=matchMedia(compactQuery);
+    const changed=()=>{setCompact(media.matches);setMenuOpen(false);setOpenControl(null);};
+    media.addEventListener('change',changed);
+    return()=>media.removeEventListener('change',changed);
+  },[]);
+  useEffect(()=>{
+    const panel=menu.current;
+    if(compact){
+      if(menuOpen&&!panel.open){panel.showModal();panel.querySelector('.map-menu-scroll').scrollTop=0;}
+      else if(!menuOpen&&panel.open)panel.close();
+    }else{
+      // The same controls stay mounted at desktop positions, including live audio.
+      if(panel.matches(':modal'))panel.close();
+      panel.setAttribute('open','');
+    }
+  },[compact,menuOpen]);
+  function closeMenu(){
+    setOpenControl(null);
+    if(compact){menu.current?.close();setMenuOpen(false);menuTrigger.current?.focus();}
+  }
+  function explorePlace(id){closeMenu();setInfoId(null);viewer.current?.landmark(id);}
+  function changeCamera(index){closeMenu();viewer.current?.camera(index);}
+  function libraryChanged(open){
+    setLibraryOpen(open);
+    if(open)closeMenu();
+    else if(compact)menuTrigger.current?.focus();
+  }
 
   async function fullscreen() {
+    closeMenu();
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
       else await document.documentElement.requestFullscreen();
@@ -84,11 +115,32 @@ export default function Map() {
     setTrees(!trees);
   }
 
-  return <main className="map" aria-label="Colombo Map">
+  return <main className={`map${compact?' is-compact':''}`} aria-label="Colombo Map">
     <div className="map-stage" id="map-scene" role="tabpanel" aria-labelledby={camera===null?'landmark-caption':`camera-${camera}`} ref={stage} />
     <div className="map-shade" />
     <header className="map-header">
       <div className="map-brand"><strong>COLOMBO</strong><span>CITY ATLAS</span><WeatherBadge/></div>
+      <button className="map-menu-trigger" ref={menuTrigger} aria-label="Open map menu" aria-haspopup="dialog" aria-controls="map-menu" aria-expanded={menuOpen} onClick={()=>setMenuOpen(true)}><Menu/><span>Menu</span></button>
+    </header>
+    <CityNavigation ref={navigation} ready={ready} selected={landmark} onSelect={explorePlace} showTags={showTags}/>
+    {ready && !error && <footer className="map-footer">
+      <div className="map-caption">
+        <span className="landmark-eyebrow">{selectedPlace?'A CLOSER LOOK':'EXPLORE SRI LANKA'}</span>
+        <h1 id="landmark-caption" lang="si">{selectedPlace?.sinhala||'කොළඹ'}</h1>
+        <span className="landmark-tamil" lang="ta">{selectedPlace?LANDMARK_STORIES[selectedPlace.id].tamil:'கொழும்பு'}</span>
+        <span className="landmark-english">{selectedPlace?.name||'Colombo · A city by the water'}</span>
+        <span className="landmark-coordinates">{coordinateLabel(selectedPlace?.coordinates||[6.92703,79.85832])}</span>
+        {selectedPlace&&<div className="landmark-arrival" key={selectedPlace.id}>
+          {arrived===selectedPlace.id?<button className="landmark-details-prompt" onClick={()=>setInfoId(selectedPlace.id)} aria-label={`More details about ${selectedPlace.name}`}><span>Curious about this place?<strong>Tap for its story</strong></span><ArrowUpRight/></button>:<span className="landmark-travelling" role="status">Taking you to {selectedPlace.name}…</span>}
+        </div>}
+      </div>
+    </footer>}
+    <dialog ref={menu} id="map-menu" className="map-controls" aria-labelledby={compact?'map-menu-title':undefined} role={compact?'dialog':'presentation'} onClose={()=>{if(compact)setMenuOpen(false);setOpenControl(null);}} onClick={event=>{
+      if(compact&&event.target===menu.current){const bounds=menu.current.getBoundingClientRect();if(event.clientX<bounds.left||event.clientX>bounds.right||event.clientY<bounds.top||event.clientY>bounds.bottom)closeMenu();}
+    }}>
+      <header className="map-menu-heading"><div><span>MAKE YOURSELF AT HOME</span><h2 id="map-menu-title">Your Colombo</h2></div><button className="icon-button" aria-label="Close map menu" onClick={closeMenu}><X/></button></header>
+      <div className="map-menu-scroll">
+        <CityPlaces ready={ready} selected={landmark} onSelect={explorePlace} showTags={showTags} onShowTags={setShowTags} compact={compact}/>
       <div className="map-tools">
         <div className="map-atmosphere">
           <SceneSelect label="Time of day" value={lighting} options={lightingOptions} disabled={!ready}
@@ -107,29 +159,19 @@ export default function Map() {
         <div className="map-actions">
           <button className="icon-button" onClick={() => {viewer.current?.animate(!animated); setAnimated(!animated);}}
             aria-label={animated ? 'Pause atmosphere' : 'Animate atmosphere'} aria-pressed={animated} disabled={!ready}
-            title={animated ? 'Pause atmosphere' : 'Animate atmosphere'}>{animated ? <Pause /> : <Play />}</button>
-          <button className="icon-button" onClick={toggleTrees} aria-label={trees ? 'Hide trees' : 'Show trees'} aria-pressed={trees} disabled={!ready} title="Trees"><TreePine /></button>
-          <button className="icon-button" onClick={fullscreen} aria-label="Toggle fullscreen" title="Fullscreen"><Maximize /></button>
+            title={animated ? 'Pause atmosphere' : 'Animate atmosphere'}>{animated ? <Pause /> : <Play />}<span className="control-label">{animated?'Pause atmosphere':'Animate atmosphere'}</span></button>
+          <button className="icon-button" onClick={toggleTrees} aria-label={trees ? 'Hide trees' : 'Show trees'} aria-pressed={trees} disabled={!ready} title="Trees"><TreePine /><span className="control-label">Trees</span></button>
+          <button className="icon-button" onClick={fullscreen} aria-label="Toggle fullscreen" title="Fullscreen"><Maximize /><span className="control-label">Fullscreen</span></button>
+          <button className="icon-button map-tags-toggle" onClick={()=>setShowTags(!showTags)} aria-label="Show map tags" aria-pressed={showTags}><Eye/><span className="control-label">Map tags</span></button>
         </div>
-      </div>
-    </header>
-    <CityNavigation ref={navigation} ready={ready} selected={landmark} onSelect={explorePlace}/>
-    {ready && !error && <footer className="map-footer">
-      <div className="map-caption">
-        <span className="landmark-eyebrow">{selectedPlace?'A CLOSER LOOK':'EXPLORE SRI LANKA'}</span>
-        <h1 id="landmark-caption" lang="si">{selectedPlace?.sinhala||'කොළඹ'}</h1>
-        <span className="landmark-tamil" lang="ta">{selectedPlace?LANDMARK_STORIES[selectedPlace.id].tamil:'கொழும்பு'}</span>
-        <span className="landmark-english">{selectedPlace?.name||'Colombo · A city by the water'}</span>
-        <span className="landmark-coordinates">{coordinateLabel(selectedPlace?.coordinates||[6.92703,79.85832])}</span>
-        <div className="caption-links"><ModelLibrary ref={library} onOpenChange={setLibraryOpen} selected={landmark} onExplore={id=>viewer.current?.landmark(id)}/>{selectedPlace&&<button onClick={()=>setInfoId(selectedPlace.id)}>About this place</button>}<button onClick={() => credits.current.showModal()}>Credits</button></div>
       </div>
       <nav className="camera-dock" aria-label="Map camera views">
         <div className="map-cameras" role="tablist" aria-label="Camera views">
           {cameraNames.map((name,index) => {
             const Icon = cameraIcons[index];
-            return <button key={name} id={`camera-${index}`} role="tab" aria-selected={camera === index} aria-controls="map-scene"
+            return <button key={name} id={`camera-${index}`} role="tab" aria-selected={camera === index} aria-controls="map-scene" disabled={!ready}
               tabIndex={camera === index || (camera===null&&index===0) ? 0 : -1} ref={element => {cameraTabs.current[index] = element;}}
-              onClick={() => viewer.current?.camera(index)} onKeyDown={event => {
+              onClick={() => changeCamera(index)} onKeyDown={event => {
                 let next;
                 if(event.key === 'ArrowRight')next=(index+1)%cameraNames.length;
                 if(event.key === 'ArrowLeft')next=(index+cameraNames.length-1)%cameraNames.length;
@@ -139,10 +181,12 @@ export default function Map() {
           })}
         </div>
         <span className="dock-divider" />
-        <button className="icon-button camera-reset" onClick={() => viewer.current?.reset()} aria-label="Reset current camera" title="Reset view"><RotateCcw /></button>
+        <button className="icon-button camera-reset" onClick={() => {closeMenu();viewer.current?.reset();}} disabled={!ready} aria-label="Reset current camera" title="Reset view"><RotateCcw /></button>
       </nav>
-      <RadioPlayer/>
-    </footer>}
+        <RadioPlayer/>
+        <div className="map-menu-links"><ModelLibrary ref={library} onOpenChange={libraryChanged} selected={landmark} onExplore={explorePlace}/><button onClick={()=>{closeMenu();credits.current.showModal();}}>Map credits</button></div>
+      </div>
+    </dialog>
     {ready && background && <div className="map-background" role="status">{background}</div>}
     {notice && <div className="map-notice" role="status">{notice}</div>}
     {!ready && !error && <div className="map-loading" role="status">
