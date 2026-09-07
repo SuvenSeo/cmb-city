@@ -46,6 +46,18 @@ so it needs a compatible 3D viewer.
   </tr>
 </table>
 
+## Make your own 3D model
+
+Want to try the reference-based approach behind these landmarks? Start with
+[the reusable 3D modeling prompt](prompts/README.md). Upload your images, describe
+the subject and intended use, and paste the complete prompt into a tool that can
+run Blender. The guide includes a reference-image worksheet, example briefs,
+render-frame options and checks for the finished model.
+
+It covers research when needed, editable geometry, realistic materials, previews
+and portable exports. It also asks for missing details and estimated dimensions
+to be identified, so a convincing model does not imply measured accuracy.
+
 ## Run it locally
 
 You need **Node.js 22.12 or newer** and npm.
@@ -122,6 +134,7 @@ expect a root deployment, rather than a nested path such as `/colombo-atlas/`.
 | `data/` | Geographic working data and its sources |
 | `scripts/` | Landmark builders, lettering and packaging tools |
 | `docs/` | Screenshots and model-building notes |
+| `prompts/` | A reusable modeling prompt and reference-image guide |
 
 For rebuilding the models or adjusting their details, see [Working with the models](docs/MODELS.md).
 

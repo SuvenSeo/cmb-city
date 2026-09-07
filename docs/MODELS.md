@@ -1,5 +1,9 @@
 # Working with the models
 
+To create a new subject from your own reference images, use the
+[single-shot 3D modeling prompt and guide](../prompts/README.md). The commands
+below rebuild the existing Colombo Atlas landmarks.
+
 The collection contains five original Blender architectural
 reconstructions: Altair, World Trade Center, Gangaramaya Temple (the main temple,
 not the separate Seema Malaka pavilion), Colombo Fort Station and Colombo
