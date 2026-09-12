@@ -46,3 +46,21 @@ font and its OFL licence are in `scripts/fonts/`.
 
 Files are served by the existing local app. Public hosting can use the same
 `dist/` output; no external asset upload is performed by the build scripts.
+
+## Photoreal export pipeline
+
+Both builders (`scripts/build_landmarks.py`, `scripts/build_expansion_blender.py`)
+now finish every mesh with `photoreal_finish()`: an angle-limited bevel for soft
+construction edges, a weighted-normal modifier for crisp flat faces, and a Smart
+UV Project so all parts are texture-ready. Glazing uses real dielectric
+transmission (IOR 1.45, exports `KHR_materials_transmission`) instead of a
+metallic tint. Survey corrections are baked in: the Clock Tower is Z-scaled to
+its surveyed 29 m, Altair uses the surveyed 13.8° lean with terraces to the
+roof and outrigger links, WTC has uniform curtain glass with thin stone bands,
+and Nelum Pokuna petals are true curved shells with champagne centre ribs.
+
+To apply these to the shipped GLBs, re-run the Blender builders above (plus
+`blender --background --threads 4 --python scripts/build_expansion_blender.py -- all`
+for the twelve expansion landmarks), then commit the regenerated `map.glb`,
+`.glb`, `.blend`, previews and catalogues. On Windows, replace the macOS Blender
+path with the installed `blender.exe`; no Blender add-ons are required.

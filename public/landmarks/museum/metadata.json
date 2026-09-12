@@ -29,7 +29,7 @@
   ],
   "interiors": true,
   "triangles": 307788,
-  "mapTriangles": 56063,
+  "mapTriangles": 56059,
   "bounds": [
     [
       -39.0,
@@ -39,9 +39,9 @@
     [
       39.0,
       52.5,
-      15.690350532531738
+      15.672706604003906
     ]
   ],
-  "bytes": 529656,
-  "downloadBytes": 11830668
+  "bytes": 529728,
+  "downloadBytes": 15369916
 }

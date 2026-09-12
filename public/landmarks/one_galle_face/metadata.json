@@ -1,0 +1,44 @@
+{
+  "name": "One Galle Face & Shangri-La Colombo",
+  "position": [
+    -1450,
+    0,
+    20
+  ],
+  "rotation": 0,
+  "mask": [
+    -1560,
+    60,
+    -1340,
+    -40
+  ],
+  "description": "Twin 50-storey glass towers (194m) and Shangri-La Hotel commanding the Galle Face oceanfront with curved retail mall podium, infinity pools, and high-performance reflective curtain walls.",
+  "reference": "1A Centre Road, Galle Face, Colombo 02",
+  "id": "one_galle_face",
+  "files": [
+    "one_galle_face.blend",
+    "one_galle_face.glb",
+    "map.glb",
+    "preview.png",
+    "preview.jpg",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
+  "triangles": 7288,
+  "mapTriangles": 7288,
+  "bounds": [
+    [
+      -74.0,
+      -56.0,
+      0.0
+    ],
+    [
+      74.0,
+      41.0,
+      194.60000610351562
+    ]
+  ],
+  "bytes": 80888,
+  "downloadBytes": 2917433
+}

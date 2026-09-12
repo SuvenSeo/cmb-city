@@ -1,0 +1,44 @@
+{
+  "name": "Fort Light & Clock Tower",
+  "position": [
+    -1480,
+    0,
+    -880
+  ],
+  "rotation": 0,
+  "mask": [
+    -1500,
+    895,
+    -1460,
+    865
+  ],
+  "description": "1857 Victorian ashlar lighthouse and clock tower at Chatham Street crossroads with four-way arched rusticated base, quoined shaft, Roman clock faces, and brass lantern dome.",
+  "reference": "Chatham Street & Janadhipathi Mawatha, Fort, Colombo 01",
+  "id": "clock-tower",
+  "files": [
+    "clock-tower.blend",
+    "clock-tower.glb",
+    "map.glb",
+    "preview.png",
+    "preview.jpg",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
+  "triangles": 14740,
+  "mapTriangles": 14740,
+  "bounds": [
+    [
+      -7.25,
+      -5.5,
+      0.0
+    ],
+    [
+      7.25,
+      5.5,
+      29.0
+    ]
+  ],
+  "bytes": 103708,
+  "downloadBytes": 1982071
+}

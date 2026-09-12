@@ -82,3 +82,37 @@ test('missing or unavailable storage returns an error instead of an HTML success
   assert.equal(response.status, 503);
   assert.equal(response.headers.get('Retry-After'), '30');
 });
+
+test('chunked assets stream seamlessly when R2 is not configured', async () => {
+  const chunks = [
+    { url: '/model.zip.part0', offset: 0, length: 2 },
+    { url: '/model.zip.part1', offset: 2, length: 3 },
+  ];
+  const chunkedHandler = createAssetHandler({
+    '/model.zip': { ...descriptor, chunks },
+  });
+  const chunkData = {
+    'https://example.com/model.zip.part0': bytes.slice(0, 2),
+    'https://example.com/model.zip.part1': bytes.slice(2, 5),
+  };
+  const env = {
+    ASSETS: {
+      fetch: async (req) => {
+        const data = chunkData[req.url];
+        if (!data) return new Response(null, { status: 404 });
+        return new Response(data);
+      },
+    },
+  };
+  const request = (headers = {}, method = 'GET') => new Request('https://example.com/model.zip', { method, headers });
+
+  const fullResp = await chunkedHandler.fetch(request(), env, {});
+  assert.equal(fullResp.status, 200);
+  assert.deepEqual(new Uint8Array(await fullResp.arrayBuffer()), bytes);
+
+  const rangeResp = await chunkedHandler.fetch(request({ Range: 'bytes=1-3' }), env, {});
+  assert.equal(rangeResp.status, 206);
+  assert.equal(rangeResp.headers.get('Content-Range'), 'bytes 1-3/5');
+  assert.deepEqual(new Uint8Array(await rangeResp.arrayBuffer()), bytes.slice(1, 4));
+});
+

@@ -2,18 +2,27 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
+import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
+import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
+import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
+import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {batchScene} from './batchScene.js';
 import {blenderToThree,cameraFieldOfView,treeCell,CITY_MAX_POLAR_ANGLE,clearOrbitMomentum} from './mapMath.js';
 import {createEnvironment} from './environment.js';
 import {createSurfaceMaterials,surfaceDetailWidth} from './surfaceMaterials.js';
 import {createLakeWater} from './lakeWater.js';
+import {createOceanWater} from './oceanWater.js';
+import {createCityTraffic} from './cityTraffic.js';
 import {separatePavilionRoof} from './towerGeometry.js';
 import {renderScale, FRAME_INTERVAL} from './renderBudget.js';
 import {createWeatherEffects} from './weatherEffects.js';
 import {WEATHER_PRESETS} from './weatherPresets.js';
-import {LANDMARKS} from './landmarks.js';
+import {LANDMARKS, ALL_LANDMARKS} from './landmarks.js';
 import {bearingFromDirection,placeLabels} from './cityNavigation.js';
 import {replaceLandmarkSurfaces,insideLandmark} from './landmarkGeometry.js';
+import {createCinematicTour, TOUR_WAYPOINTS} from './explorationTour.js';
+import {createTukTukModel} from './tuktukVehicle.js';
+import {createTukTukPhysics} from './tuktukPhysics.js';
 
 const V=THREE.Vector3;
 
@@ -21,7 +30,7 @@ export function createMap(container,callbacks) {
   const scene=new THREE.Scene();
   // Millimetre-separated terrace and facade surfaces share a city-scale view.
   // Standard perspective depth loses that separation as the camera pulls back.
-  const renderer=new THREE.WebGLRenderer({antialias:true,logarithmicDepthBuffer:true,powerPreference:'default'});
+  const renderer=new THREE.WebGLRenderer({antialias:true,logarithmicDepthBuffer:true,powerPreference:'high-performance'});
   const small=container.clientWidth<700;
   renderer.setPixelRatio(renderScale(container.clientWidth,container.clientHeight,devicePixelRatio));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -47,22 +56,98 @@ export function createMap(container,callbacks) {
   const environment=createEnvironment(scene,renderer,small);
   const prepareMaterial=createSurfaceMaterials(renderer);
   const weatherEffects=createWeatherEffects(scene,small);
+  const traffic=createCityTraffic(scene);
+  const composerTarget=new THREE.WebGLRenderTarget(container.clientWidth||2,container.clientHeight||2,{samples:small?0:4,type:THREE.HalfFloatType});
+  const composer=new EffectComposer(renderer,composerTarget);
+  const renderPass=new RenderPass(scene,camera);
+  composer.addPass(renderPass);
+  const bloomPass=new UnrealBloomPass(new THREE.Vector2(container.clientWidth,container.clientHeight),.25,.2,.88);
+  composer.addPass(bloomPass);
+  const outputPass=new OutputPass();
+  composer.addPass(outputPass);
   const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const abort=new AbortController();
   const resources=new Set();
   const vegetation=new THREE.Group();vegetation.name='City canopy instances';scene.add(vegetation);
   const treeGroups=[];
   let alive=true,ready=false,dirty=true,raf=0,metadata,activeCamera=0,lens=64;
-  let motion=null,lastTreePosition=new V(Infinity,Infinity,Infinity),water=null;
+  let motion=null,lastTreePosition=new V(Infinity,Infinity,Infinity),water=null,ocean=null;
   let lastRendered=-Infinity,lastFrame=0,elapsed=0,renderedFrames=0;
   let interacting=false;
   let activeLandmark=null,navigationWidth=0,navigationHeight=0;
   const navigationMatrix=new THREE.Matrix4(),direction=new V(),projected=new V();
   const tagRay=new THREE.Ray(),tagDirection=new V(),tagHit=new V();
-  const tagOccluders=LANDMARKS.filter(place=>place.occlusionBox).map(place=>({id:place.id,box:new THREE.Box3(new V(...place.occlusionBox[0]),new V(...place.occlusionBox[1]))}));
+  const tagOccluders=ALL_LANDMARKS.filter(place=>place.occlusionBox).map(place=>({id:place.id,box:new THREE.Box3(new V(...place.occlusionBox[0]),new V(...place.occlusionBox[1]))}));
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   let suspended=false;
   let animateEnvironment=false,lighting='daylight',weatherKind='clear',lightningEnabled=true;
+
+  let explorationMode='orbit';
+  let tukIndex=0;
+  let tukPerspective='chase'; // 'chase' | 'cockpit' | 'passenger'
+  let tukDriveMode='manual'; // 'manual' | 'cruise'
+  const tukInput={forward:false,backward:false,left:false,right:false,handbrake:false};
+
+  const tukVehicle=createTukTukModel({primaryColor:0x1b5e20,secondaryColor:0xf9a825});
+  tukVehicle.root.visible=false;
+  scene.add(tukVehicle.root);
+  const tukPhysics=createTukTukPhysics({startX:-1380,startY:1.2,startZ:450,startHeading:0});
+
+  let walkSpot='galle_face';
+  let currentWalkHeight=2.2;
+  const walkMove={forward:false,backward:false,left:false,right:false};
+  const tour=createCinematicTour({
+    onWaypointChange:(wp,index,total)=>{
+      callbacks.onTourTelemetry?.({waypoint:wp,index,total,isPaused:tour.isPaused,progress:0});
+    },
+    onTourEnd:()=>{
+      explorationMode='orbit';
+      callbacks.onModeChange?.('orbit');
+      invalidate();
+    }
+  });
+
+  function onKeyDown(e){
+    const k=e.key.toLowerCase();
+    if(explorationMode==='walk'){
+      if(k==='w'||k==='arrowup')walkMove.forward=true;
+      if(k==='s'||k==='arrowdown')walkMove.backward=true;
+      if(k==='a'||k==='arrowleft')walkMove.left=true;
+      if(k==='d'||k==='arrowright')walkMove.right=true;
+      invalidate();
+    }else if(explorationMode==='tuktuk'){
+      if(k==='w'||k==='arrowup')tukInput.forward=true;
+      if(k==='s'||k==='arrowdown')tukInput.backward=true;
+      if(k==='a'||k==='arrowleft')tukInput.left=true;
+      if(k==='d'||k==='arrowright')tukInput.right=true;
+      if(k===' ')tukInput.handbrake=true;
+      if(k==='h')callbacks.onHonkHorn?.();
+      if(k==='c'){
+        const views=['chase','cockpit','passenger'];
+        tukPerspective=views[(views.indexOf(tukPerspective)+1)%views.length];
+      }
+      invalidate();
+    }
+  }
+  function onKeyUp(e){
+    const k=e.key.toLowerCase();
+    if(explorationMode==='walk'){
+      if(k==='w'||k==='arrowup')walkMove.forward=false;
+      if(k==='s'||k==='arrowdown')walkMove.backward=false;
+      if(k==='a'||k==='arrowleft')walkMove.left=false;
+      if(k==='d'||k==='arrowright')walkMove.right=false;
+      invalidate();
+    }else if(explorationMode==='tuktuk'){
+      if(k==='w'||k==='arrowup')tukInput.forward=false;
+      if(k==='s'||k==='arrowdown')tukInput.backward=false;
+      if(k==='a'||k==='arrowleft')tukInput.left=false;
+      if(k==='d'||k==='arrowright')tukInput.right=false;
+      if(k===' ')tukInput.handbrake=false;
+      invalidate();
+    }
+  }
+  window.addEventListener('keydown',onKeyDown);
+  window.addEventListener('keyup',onKeyUp);
 
   function keep(root) {resources.add(root);return root;}
   function disposeRoot(root) {
@@ -174,7 +259,7 @@ export function createMap(container,callbacks) {
   }
 
   function focusLandmark(id){
-    const place=LANDMARKS.find(item=>item.id===id);if(!place||!ready)return;
+    const place=ALL_LANDMARKS.find(item=>item.id===id);if(!place||!ready)return;
     clearOrbitMomentum(controls);activeLandmark=id;lens=place.lens;navigationWidth=0;
     const portrait=container.clientWidth/container.clientHeight<.75;
     const position=new V(...(portrait&&place.mobileView||place.view)),target=new V(...place.target);
@@ -189,7 +274,7 @@ export function createMap(container,callbacks) {
     if(navigationMatrix.equals(camera.matrixWorld)&&navigationWidth===width&&navigationHeight===height)return;
     navigationMatrix.copy(camera.matrixWorld);navigationWidth=width;navigationHeight=height;
     camera.getWorldDirection(direction);
-    const points=LANDMARKS.map(place=>{
+    const points=ALL_LANDMARKS.map(place=>{
       projected.fromArray(place.anchor||place.point);
       const distance=camera.position.distanceTo(projected);
       tagRay.set(camera.position,tagDirection.subVectors(projected,camera.position).normalize());
@@ -205,8 +290,13 @@ export function createMap(container,callbacks) {
 
   function resize() {
     const w=container.clientWidth,h=container.clientHeight;if(!w||!h)return;
-    renderer.setPixelRatio(renderScale(w,h,devicePixelRatio));
-    renderer.setSize(w,h);camera.aspect=w/h;camera.fov=cameraFieldOfView(lens,camera.aspect);camera.updateProjectionMatrix();
+    const pr=renderScale(w,h,devicePixelRatio);
+    renderer.setPixelRatio(pr);
+    renderer.setSize(w,h);
+    composer.setPixelRatio(pr);
+    composer.setSize(w,h);
+    bloomPass.resolution.set(Math.floor(w/2),Math.floor(h/2));
+    camera.aspect=w/h;camera.fov=cameraFieldOfView(lens,camera.aspect);camera.updateProjectionMatrix();
     canvas.dataset.renderScale=renderer.getPixelRatio().toFixed(3);
     canvas.dataset.renderPixels=String(canvas.width*canvas.height);water?.invalidate();invalidate();
   }
@@ -229,29 +319,100 @@ export function createMap(container,callbacks) {
     raf=0;
     if(!alive||document.hidden||suspended)return;
     const delta=lastFrame?Math.min((now-lastFrame)/1000,.1):0;lastFrame=now;
-    if(animateEnvironment)elapsed+=delta;
-    if(motion){
-      const t=Math.min(1,(now-motion.start)/1100),e=t*t*(3-2*t);
-      camera.position.lerpVectors(motion.fromPosition,motion.position,e);controls.target.lerpVectors(motion.fromTarget,motion.target,e);
-      if(t===1){motion=null;callbacks.onArrival?.(activeLandmark);}dirty=true;
+    if(animateEnvironment||ready)elapsed+=delta;
+    if(explorationMode==='tuktuk'){
+      tukVehicle.root.visible=true;
+      if(tukDriveMode==='cruise'){
+        const pose=traffic.getTukTukPose(tukIndex);
+        if(pose){
+          tukPhysics.updateCruise(delta, pose.position, pose.tangent, pose.speedKmH);
+        }
+      }else{
+        tukPhysics.updateDrive(delta, tukInput);
+      }
+      tukVehicle.root.position.copy(tukPhysics.position);
+      tukVehicle.root.rotation.y=tukPhysics.heading;
+      tukVehicle.setSteerAngle(tukPhysics.steerAngle);
+      tukVehicle.setBodyRoll(tukPhysics.bodyRoll, tukPhysics.bodyPitch);
+      tukVehicle.rollWheels(tukPhysics.speed * delta);
+
+      tukPhysics.updateCamera(camera, controls, tukPerspective, delta);
+
+      const isThrottle = Math.abs(tukPhysics.speed) > 0.1 || tukInput.forward || tukInput.backward;
+      callbacks.onEngineAudio?.(tukPhysics.speedKmH, isThrottle);
+      callbacks.onTukTukTelemetry?.({
+        speedKmH: tukPhysics.speedKmH,
+        fareLKR: Math.round(tukPhysics.fareLKR),
+        distanceKm: tukPhysics.distanceKm,
+        tukIndex,
+        totalTuks: traffic.getTukTukCount(),
+        perspective: tukPerspective,
+        driveMode: tukDriveMode
+      });
+      dirty=true;
+    }else{
+      if(tukVehicle.root.visible){
+        tukVehicle.root.visible=false;
+        callbacks.onEngineAudio?.(0, false);
+      }
+      if(explorationMode==='tour'){
+        const result=tour.update(now,camera,controls);
+        if(result)dirty=true;
+      }else if(explorationMode==='walk'){
+        if(walkMove.forward||walkMove.backward||walkMove.left||walkMove.right){
+          const forward=new THREE.Vector3();
+          camera.getWorldDirection(forward);
+          forward.y=0;forward.normalize();
+          const right=new THREE.Vector3().crossVectors(forward,new THREE.Vector3(0,1,0)).normalize();
+          const speed=(delta||.033)*14.0;
+          const move=new THREE.Vector3();
+          if(walkMove.forward)move.addScaledVector(forward,speed);
+          if(walkMove.backward)move.addScaledVector(forward,-speed);
+          if(walkMove.right)move.addScaledVector(right,speed);
+          if(walkMove.left)move.addScaledVector(right,-speed);
+          camera.position.add(move);
+          controls.target.add(move);
+          camera.position.y=currentWalkHeight+Math.sin(now*.008)*.04;
+          dirty=true;
+        }
+      }else if(motion){
+        const t=Math.min(1,(now-motion.start)/1100),e=t*t*(3-2*t);
+        camera.position.lerpVectors(motion.fromPosition,motion.position,e);controls.target.lerpVectors(motion.fromTarget,motion.target,e);
+        if(t===1){motion=null;callbacks.onArrival?.(activeLandmark);}dirty=true;
+      }
     }
     const settling=controls.update();
     if(settling)dirty=true;
-    if(camera.position.y<5){camera.position.y=5;dirty=true;}
+    if(explorationMode==='orbit'&&camera.position.y<5){camera.position.y=5;dirty=true;}
+    const isNight=lighting==='night';
+    const shouldAnimateTraffic=ready&&!reducedMotion.matches;
+    if(shouldAnimateTraffic){
+      traffic.update(delta||.033,elapsed,isNight);
+      prepareMaterial.setTime(elapsed);
+    }
     // Bound both interaction and animation. A resting, paused map schedules no
     // further frames; a pending reflection gets a final update after a drag.
-    if((dirty||(ready&&animateEnvironment)||water?.pending)&&now-lastRendered>=FRAME_INTERVAL-.5){
+    const isSpecialActive=explorationMode==='tuktuk'||(explorationMode==='tour'&&tour.isActive&&!tour.isPaused)||(explorationMode==='walk'&&(walkMove.forward||walkMove.backward||walkMove.left||walkMove.right));
+    if((dirty||isSpecialActive||(ready&&animateEnvironment)||shouldAnimateTraffic||water?.pending)&&now-lastRendered>=FRAME_INTERVAL-.5){
       updateTreeDetail();environment.updateShadows(camera,controls.target);
       const flash=weatherEffects.update(elapsed,camera,controls.target,animateEnvironment&&lightningEnabled&&!reducedMotion.matches);
-      environment.flash(flash);water?.update(elapsed);
-      renderer.info.reset();renderer.render(scene,camera);updateNavigation();dirty=false;lastRendered=now;renderedFrames++;
+      environment.flash(flash);water?.update(elapsed);ocean?.update(elapsed);
+      if(isNight){
+        bloomPass.strength=0.55;bloomPass.threshold=0.72;bloomPass.radius=0.35;
+      }else if(weatherKind==='storm'||weatherKind==='heavy'){
+        bloomPass.strength=0.45;bloomPass.threshold=0.78;bloomPass.radius=0.25;
+      }else{
+        bloomPass.strength=0.18;bloomPass.threshold=0.92;bloomPass.radius=0.20;
+      }
+      renderer.info.reset();composer.render();updateNavigation();dirty=false;lastRendered=now;renderedFrames++;
       canvas.dataset.ready=String(ready);canvas.dataset.draws=String(renderer.info.render.calls);canvas.dataset.triangles=String(renderer.info.render.triangles);
       canvas.dataset.frames=String(renderedFrames);canvas.dataset.camera=String(activeCamera);
       canvas.dataset.position=camera.position.toArray().map(n=>n.toFixed(2)).join(',');
       canvas.dataset.weather=weatherKind;canvas.dataset.rainDrops=String(weatherEffects.drops);canvas.dataset.lightning=weatherEffects.flash.toFixed(3);
       canvas.dataset.lighting=lighting;canvas.dataset.animated=String(animateEnvironment);canvas.dataset.waterTime=elapsed.toFixed(3);canvas.dataset.reflections=String(water?.reflections||0);
+      canvas.dataset.mode=explorationMode;
     }
-    if(dirty||motion||settling||interacting||(ready&&animateEnvironment)||water?.pending)requestFrame();
+    if(dirty||isSpecialActive||motion||settling||interacting||(ready&&animateEnvironment)||shouldAnimateTraffic||water?.pending)requestFrame();
   }
   requestFrame();
 
@@ -261,15 +422,17 @@ export function createMap(container,callbacks) {
     const keys=['core','tower','canopies'],loaded={};
     const total=keys.reduce((n,k)=>n+metadata.assets[k].bytes,0);
     const progress=(key,bytes)=>{loaded[key]=bytes;callbacks.onProgress(Math.min(.94,Object.values(loaded).reduce((a,b)=>a+b,0)/total*.94));};
-    const [core,tower,canopies,trees,catalog]=await Promise.all([
+    const [core,tower,canopies,trees,catalog,expansionCatalog]=await Promise.all([
       ...keys.map(k=>model(metadata.assets[k],bytes=>progress(k,bytes))),json(metadata.assets.trees.url),
       json('/landmarks/catalog.json').catch(error=>{if(error.name==='AbortError')throw error;return [];}),
+      json('/landmarks/expansion_catalog.json').catch(error=>{if(error.name==='AbortError')throw error;return [];}),
     ]);
     if(!alive)return;
     const additions=[];
+    const allLandmarks = [...(catalog || []), ...(expansionCatalog || [])];
     // A missing optional asset retains its mapped building. Replacement happens
     // only after the complete GLB has loaded, so there are no holes on failure.
-    for(const entry of catalog){
+    for(const entry of allLandmarks){
       try{
         const source=await model({url:`/landmarks/${entry.id}/map.glb`});
         if(!alive)return;
@@ -283,11 +446,12 @@ export function createMap(container,callbacks) {
     canvas.dataset.replacedTriangles=String(replaceLandmarkSurfaces(core,additions));
     prepareStatic(core);
     water=createLakeWater(core,scene,environment,small);water?.setWeather(weatherKind);
+    ocean=createOceanWater(scene,environment,small);ocean.setWeather(weatherKind);ocean.setLighting(lighting);
     separatePavilionRoof(tower);
     const landmark=batchScene(tower);
     landmark.traverse(o=>{if(!o.isMesh)return;if(surfaceDetailWidth(o.material.name)){o.visible=false;return;}o.castShadow=true;o.receiveShadow=true;prepareMaterial(o.material);});
     keep(landmark);scene.add(landmark);
-    createTrees(canopies,trees.instances.filter(pose=>!additions.some(({mask})=>insideLandmark(pose[0],pose[2],mask))));
+    createTrees(canopies,trees.instances.filter(pose=>pose[0]>=-1330&&!additions.some(({mask})=>insideLandmark(pose[0],pose[2],mask))));
     renderer.shadowMap.needsUpdate=true;ready=true;invalidate();
     callbacks.onProgress(1);callbacks.onReady();
     try{
@@ -305,21 +469,82 @@ export function createMap(container,callbacks) {
     landmark:focusLandmark,
     reset:()=>activeLandmark?focusLandmark(activeLandmark):setCamera(activeCamera),
     trees:visible=>{vegetation.visible=visible;renderer.shadowMap.needsUpdate=true;water?.invalidate();invalidate();},
-    environment:name=>{if(environment.set(name)){lighting=name;water?.invalidate();invalidate();}},
+    environment:name=>{
+      if(environment.set(name)){
+        lighting=name;
+        const isNight=name==='night';
+        prepareMaterial.setNight(isNight?1:0);
+        water?.setNight(isNight,weatherKind);
+        ocean?.setLighting(name);
+        water?.invalidate();
+        invalidate();
+      }
+    },
     weather:name=>{
       if(!WEATHER_PRESETS[name])return;
       weatherKind=name;elapsed=0;lastFrame=0;
-      environment.setWeather(name);weatherEffects.set(name);water?.setWeather(name);
+      environment.setWeather(name);weatherEffects.set(name);
+      water?.setWeather(name,lighting==='night');
+      ocean?.setWeather(name);
       prepareMaterial.setWetness(WEATHER_PRESETS[name].wetness);
       animateEnvironment=WEATHER_PRESETS[name].rain>0&&!reducedMotion.matches;
       callbacks.onAnimation?.(animateEnvironment);invalidate();
     },
     lightning:enabled=>{lightningEnabled=enabled;invalidate();},
     animate:enabled=>{animateEnvironment=enabled;lastFrame=0;invalidate();},
+    setMode(mode,options={}){
+      explorationMode=mode;motion=null;
+      if(mode==='orbit'){
+        camera.near=0.5;camera.updateProjectionMatrix();
+        controls.maxPolarAngle=CITY_MAX_POLAR_ANGLE;
+        controls.minDistance=90;controls.maxDistance=8500;
+      }else if(mode==='walk'){
+        camera.near=0.2;camera.updateProjectionMatrix();
+        controls.maxPolarAngle=Math.PI/2+0.05;
+        controls.minDistance=0.5;controls.maxDistance=2500;
+        const spot=options.spot||'galle_face';
+        walkSpot=spot;
+        if(spot==='galle_face'){
+          camera.position.set(-1365,5.5,450);controls.target.set(-1450,4.5,450);currentWalkHeight=5.5;
+        }else if(spot==='beira_lake'){
+          camera.position.set(-160,10.0,1120);controls.target.set(-414,60.0,896);currentWalkHeight=10.0;
+        }else if(spot==='lotus_plaza'){
+          camera.position.set(-40,4.0,160);controls.target.set(0,180,0);currentWalkHeight=4.0;
+        }
+        controls.update();
+      }else if(mode==='tuktuk'){
+        camera.near=0.04;camera.updateProjectionMatrix();
+        tukIndex=options.tukIndex??0;
+        controls.maxPolarAngle=Math.PI/2+0.1;
+        controls.minDistance=0.2;controls.maxDistance=2500;
+      }else if(mode==='tour'){
+        camera.near=0.5;camera.updateProjectionMatrix();
+        tour.start(camera.position,controls.target,options.startIndex??0);
+      }
+      callbacks.onModeChange?.(mode,{spot:walkSpot,tukIndex});
+      invalidate();
+    },
+    walkMoveDir(move){Object.assign(walkMove,move);invalidate();},
+    nextTukTuk(){
+      tukIndex=(tukIndex+1)%traffic.getTukTukCount();
+      callbacks.onModeChange?.('tuktuk',{tukIndex});
+      invalidate();
+    },
+    setTukTukPerspective(perspective){tukPerspective=perspective;invalidate();},
+    setTukTukDriveMode(mode){tukDriveMode=mode;invalidate();},
+    setTukTukInput(input){Object.assign(tukInput,input);invalidate();},
+    teleportTukTuk(x,y,z,heading){tukPhysics.teleport(x,y,z,heading);invalidate();},
+    tourAction(action){
+      if(action==='pause')tour.togglePause();
+      else if(action==='next')tour.next(camera.position,controls.target);
+      else if(action==='prev')tour.prev(camera.position,controls.target);
+      invalidate();
+    },
     dispose(){
       alive=false;abort.abort();cancelAnimationFrame(raf);observer.disconnect();controls.dispose();
+      window.removeEventListener('keydown',onKeyDown);window.removeEventListener('keyup',onKeyUp);
       document.removeEventListener('visibilitychange',onVisibility);canvas.removeEventListener('webglcontextlost',onContextLost);reducedMotion.removeEventListener('change',onMotionPreference);
-      weatherEffects.dispose();water?.dispose();environment.dispose();
+      weatherEffects.dispose();water?.dispose();ocean?.dispose();environment.dispose();traffic.dispose();tukVehicle.dispose();composer.dispose();
       for(const root of resources)disposeRoot(root);resources.clear();renderer.dispose();canvas.remove();
     },
   };

@@ -1,0 +1,44 @@
+{
+  "name": "Cinnamon Life \u00b7 City of Dreams",
+  "position": [
+    -1115,
+    0,
+    220
+  ],
+  "rotation": 0,
+  "mask": [
+    -1220,
+    -140,
+    -1010,
+    -290
+  ],
+  "description": "Cecil Balmond\u2019s deconstructivist integrated resort with iconic 28m cantilevered hotel over Beira Lake, diamond diagrid exoskeleton, twin residential towers, and connecting sky bridge.",
+  "reference": "Justice Akbar Mawatha, Slave Island, Colombo 02",
+  "id": "cinnamon_life",
+  "files": [
+    "cinnamon_life.blend",
+    "cinnamon_life.glb",
+    "map.glb",
+    "preview.png",
+    "preview.jpg",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
+  "triangles": 5820,
+  "mapTriangles": 5820,
+  "bounds": [
+    [
+      -84.0,
+      -43.0,
+      0.0
+    ],
+    [
+      84.0,
+      45.0,
+      157.8000030517578
+    ]
+  ],
+  "bytes": 69556,
+  "downloadBytes": 3036665
+}

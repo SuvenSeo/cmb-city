@@ -11,7 +11,7 @@
 ## Fidelity
 Exterior visual reconstruction from public photographs, mapped footprint context and published building descriptions. Heights, plans, colours and ornament are approximate unless supported by the reference. No measured survey, interior reconstruction or photogrammetry is claimed. Decorative sculpture is simplified. Suitable for city visualization and further refinement; not construction or navigation.
 
-Detailed mesh: 67,996 triangles. Map mesh: 40,132 triangles.
+Detailed mesh: 73,492 triangles. Map mesh: 45,628 triangles.
 Dimensions (X / Y / Z in Blender metres): 123.0 / 80.0 / 240.9.
 
 Reference: https://www.safdiearchitects.com/projects/altair-residences

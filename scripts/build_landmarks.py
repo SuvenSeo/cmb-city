@@ -36,11 +36,63 @@ def portable_source_paths():
                 if space.type == 'FILE_BROWSER' and space.params:
                     space.params.directory = b'//'
 
-def material(name, color, rough=.7, metal=0):
+def material(name, color, rough=.7, metal=0, transmission=0, ior=1.45, emission=None, emission_strength=0):
     m=bpy.data.materials.new('Landmark / '+name); m.diffuse_color=(*color,1); m.use_nodes=True
     p=m.node_tree.nodes.get('Principled BSDF'); p.inputs['Base Color'].default_value=(*color,1)
     p.inputs['Roughness'].default_value=rough; p.inputs['Metallic'].default_value=metal
+    def set_input(*keys, value):
+        for key in keys:
+            sock=p.inputs.get(key)
+            if sock is not None:
+                sock.default_value=value
+                return
+    if transmission:
+        # True dielectric glass: exports KHR_materials_transmission to glTF,
+        # rendering as refractive glazing instead of brushed aluminium.
+        set_input('Transmission Weight','Transmission',value=transmission)
+        set_input('IOR',value=ior)
+    if emission is not None:
+        set_input('Emission Color',value=(*emission,1))
+        set_input('Emission Strength','Emission',value=emission_strength)
     MATS[name]=m
+
+def scale_z(factor):
+    """Uniformly rescale every authored part in Z (used for surveyed-height corrections)."""
+    for verts,_ in PARTS.values():
+        for i,(x,y,z) in enumerate(verts):
+            verts[i]=(x,y,z*factor)
+
+def photoreal_finish(objs):
+    """Edge softening, clean normals and UVs so exports shade like real materials.
+
+    Angle-limited bevel rounds only hard 90-degree construction edges, the
+    weighted-normal modifier keeps flat faces crisp, and a Smart UV Project
+    gives every part texture-ready coordinates. Each step is guarded so an API
+    change in a future Blender release can never break the export.
+    """
+    sc=bpy.context.scene
+    try:
+        for o in objs:
+            if o.type!='MESH':continue
+            bev=o.modifiers.new('Photoreal edge softening','BEVEL')
+            bev.limit_method='ANGLE';bev.angle_limit=math.radians(30)
+            bev.width=.05;bev.segments=2;bev.harden_normals=True
+            wn=o.modifiers.new('Weighted normal','WEIGHTED_NORMAL')
+            wn.keep_sharp=True
+    except Exception as e:print('Notice: bevel/weighted-normal skipped:',e)
+    try:
+        bpy.ops.object.select_all(action='DESELECT')
+        for o in objs:
+            if o.type!='MESH':continue
+            sc.view_layers[0].objects.active=o;o.select_set(True)
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.uv.smart_project(angle_limit=66,island_margin=.02)
+            bpy.ops.object.mode_set(mode='OBJECT')
+            o.select_set(False)
+    except Exception as e:
+        print('Notice: smart UV skipped:',e)
+        try:bpy.ops.object.mode_set(mode='OBJECT')
+        except Exception:pass
 
 def reset():
     global PARTS, GROUP, DETAIL, MATS
@@ -50,14 +102,23 @@ def reset():
     for name,c,r,m in [
         ('Limestone',(.70,.69,.62),.78,0),('Ivory',(.87,.85,.77),.68,0),
         ('White plaster',(.91,.90,.85),.78,0),('Concrete',(.57,.58,.55),.84,0),
-        ('Glass',(.12,.24,.27),.23,.48),('Glass light',(.24,.36,.39),.28,.36),
-        ('Glass shade',(.065,.13,.16),.29,.4),('Metal',(.23,.27,.27),.4,.7),
+        ('Glass',(.12,.24,.27),.06,0),('Glass light',(.24,.36,.39),.08,0),
+        ('Glass shade',(.065,.13,.16),.07,0),('Metal',(.23,.27,.27),.4,.7),
         ('Gold',(.69,.40,.09),.3,.65),('Bronze',(.22,.13,.054),.47,.6),
         ('Terracotta',(.34,.15,.09),.88,0),('Roof tile',(.23,.28,.29),.74,.04),
         ('Timber',(.11,.067,.035),.85,0),('Shadow',(.025,.043,.043),.9,0),
         ('Leaves',(.10,.22,.09),.92,0),('Leaves light',(.19,.30,.105),.94,0),
         ('Paving',(.48,.47,.42),.96,0),('Gravel',(.23,.22,.20),1,0),
         ('Pool',(.065,.31,.34),.17,.3),('Red',(.54,.08,.035),.72,0)]: material(name,c,r,m)
+    # Dielectric glazing: refractive transmission instead of a metallic tint.
+    for g in ['Glass','Glass light','Glass shade']:
+        node=MATS[g].node_tree.nodes.get('Principled BSDF')
+        if node is None:continue
+        for key in ['Transmission Weight','Transmission']:
+            sock=node.inputs.get(key)
+            if sock is not None:sock.default_value=1.0;break
+        ior=node.inputs.get('IOR')
+        if ior is not None:ior.default_value=1.45
 
 def group(name, detail=False):
     global GROUP, DETAIL
@@ -182,7 +243,7 @@ def altair():
         z=11+floor*3.28
         group(f'02 Vertical tower / floors {floor//10*10+1:02d}–{min(69,floor//10*10+10):02d}')
         box((-36,-4,z),(28,51,.30),'Ivory')
-        box((-36,-4,z+1.67),(26,48,3.02),'Glass' if floor%4 else 'Glass light')
+        box((-36,-4,z+1.67),(26,48,3.02),'Glass')
         for xx in [-50.4,-21.6]:
             for yy in [-25,-17,-9,-1,7,15]:box((xx,yy,z+1.7),(.70,1,3.3),'Ivory')
         for yy in [-29.7,21.7]:
@@ -192,17 +253,23 @@ def altair():
             for yy in [-30,22]:
                 box((-36,yy,z+1.2),(27,.16,.15),'Metal')
                 for xx in range(-48,-22,3):box((xx,yy,z+1.8),(.1,.15,2.9),'Metal')
-    def lean(f):return 40-min(max(f-4,0),35)*1.30, 10-min(max(f-4,0),35)*.63
+    # Surveyed lean is 13.8 degrees over levels 5-39, then vertical: 28.2 m of
+    # lateral shift, frozen above floor 39.
+    def lean(f):
+        k=min(max(f-4,0),35)
+        return 40-k*.805, 10-k*.39
     for floor in range(61):
         z=11+floor*3.28;xx,yy=lean(floor)
         group(f'04 Leaning tower / floors {floor//10*10+1:02d}–{min(61,floor//10*10+10):02d}')
-        box((xx,yy,z),(29,32,.32),'Ivory');box((xx,yy,z+1.7),(26,28.8,3.02),'Glass' if floor%3 else 'Glass shade')
+        box((xx,yy,z),(29,32,.32),'Ivory');box((xx,yy,z+1.7),(26,28.8,3.02),'Glass')
         # Balcony edges remain physically separated from recessed glazing.
         for edge in [-1,1]:box((xx,yy+edge*16,z+.95),(29,.24,.48),'Ivory')
-        if 5<floor<42:
+        if 5<floor<60:
             group('05 Garden terraces')
             box((xx+12,yy+12,z+.55),(2.1,6,.7),'Limestone')
-            bush(xx+12,yy+12,z+.9,.95)
+            bush(xx+12,yy+12,z+.9,.6+(floor%5)*.2)
+            box((xx-12,yy+12,z+.55),(2.1,6,.7),'Limestone')
+            bush(xx-12,yy+12,z+.9,.7+((floor+2)%5)*.18)
         group('06 Balcony rails',True)
         for edge in [-1,1]:
             beam((xx-14,yy+edge*16,z+1.4),(xx+14,yy+edge*16,z+1.4),.12,'Metal')
@@ -225,6 +292,9 @@ def altair():
     xx,yy=lean(60);box((xx,yy,212),(30,33,.65),'Ivory');box((xx,yy,212.6),(27,28,.55),'Paving')
     box((xx,yy+5,213),(20,5,.25),'Pool')
     for x in [-12,-5,2,9]:bush(xx+x,yy-12,213,1.3)
+    # Steel outrigger links between the towers at levels 39/41.
+    for oz in [11+39*3.28,11+41*3.28]:
+        ox1,oy1=lean(39);beam((-36,oy1,oz),(ox1,oy1,oz),1.2,'Metal')
     box((-36,-4,238),(28,51,.6),'Ivory');box((-36,-4,239),(12,19,2),'Concrete')
     group('09 Roof plant',True)
     for x in [-42,-32]:
@@ -247,8 +317,8 @@ def wtc():
             for i,p in enumerate(poly):
                 q=poly[(i+1)%len(poly)]
                 a=(tx+p[0],p[1],z+.45);b=(tx+q[0],q[1],z+.45);c=(*b[:2],z+3.46);d=(*a[:2],z+3.46)
-                mesh('Curved curtain panel',[a,b,c,d],[(0,1,2,3)],['Glass','Glass light','Glass shade'][(i+f//4)%3])
-                beam((tx+p[0],p[1],z+.2),(tx+q[0],q[1],z+.2),.60,'Limestone',.6)
+                mesh('Curved curtain panel',[a,b,c,d],[(0,1,2,3)],'Glass')
+                beam((tx+p[0],p[1],z+.2),(tx+q[0],q[1],z+.2),.30,'Limestone',.3)
                 if i<40:
                     group('04 Glazing divisions',True)
                     beam(a,d,.075,'Metal')
@@ -260,11 +330,11 @@ def wtc():
                 box((tx+side*18,-8.5,z+1.7),(.55,17,3.46),'Limestone')
                 for yy in [-14.5,-10.5,-6.5,-2.5]:box((tx+side*18.36,yy,z+1.7),(.14,2.6,2.05),'Glass')
         group('05 Roof parapets and service core')
-        mesh('D-shaped roof deck',[(tx+x,y,151.5) for x,y in poly],[tuple(range(len(poly)))],'Limestone')
-        box((tx,-2,152),(15,18,1.2),'Concrete')
+        mesh('D-shaped roof deck',[(tx+x,y,151.0) for x,y in poly],[tuple(range(len(poly)))],'Limestone')
+        box((tx,-2,151.5),(15,18,1.2),'Concrete')
         group('06 Roof mechanical equipment',True)
         for x in [-5,5]:
-            for y in [-7,2]:box((tx+x,y,153),(3.5,5,1.2),'Metal')
+            for y in [-7,2]:box((tx+x,y,152),(3.5,5,1.2),'Metal')
     group('07 Entry atrium')
     for x in [-12,-6,0,6,12]:beam((x,20,2),(x,15,9),.20,'Metal')
     mesh('Glass entry canopy',[(-14,20,2),(14,20,2),(14,15,9),(-14,15,9)],[(0,1,2,3)],'Glass light')
@@ -371,6 +441,7 @@ def finish(id,spec,render=True):
         geo=bpy.data.meshes.new(name+' / '+mat);geo.from_pydata(verts,[],faces);geo.update()
         ob=bpy.data.objects.new(name+' / '+mat,geo);col.objects.link(ob);geo.materials.append(MATS[mat]);ob['detail']=detail
         for p in geo.polygons:p.use_smooth=smooth
+    photoreal_finish([o for o in bpy.context.scene.objects if o.type=='MESH'])
     sc=bpy.context.scene;sc.unit_settings.system='METRIC';sc.unit_settings.scale_length=1
     sc['landmark']=spec['name'];sc['accuracy']='Photograph-informed architectural reconstruction. Approximate dimensions; see README and REFERENCES for scope and uncertain details.'
     sc['reference']=spec['reference'];sc['orientation']='Metres. Blender Z up. Map placement is in catalog.json. Microdetail may be hidden for web use.'

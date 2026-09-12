@@ -1,0 +1,44 @@
+{
+  "name": "Independence Memorial Hall",
+  "position": [
+    240,
+    0,
+    2580
+  ],
+  "rotation": 0,
+  "mask": [
+    190,
+    -2470,
+    290,
+    -2640
+  ],
+  "description": "Kandyan Royal Audience Hall national monument featuring 60 carved stone pillars with Pekada floral bracket capitals, four-tiered plinth, guardian lions, and double Kandyan terracotta roof.",
+  "reference": "Independence Square, Cinnamon Gardens, Colombo 07",
+  "id": "independence-hall",
+  "files": [
+    "independence-hall.blend",
+    "independence-hall.glb",
+    "map.glb",
+    "preview.png",
+    "preview.jpg",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
+  "triangles": 25728,
+  "mapTriangles": 25728,
+  "bounds": [
+    [
+      -38.75,
+      -34.599998474121094,
+      0.0
+    ],
+    [
+      38.75,
+      24.75,
+      21.200000762939453
+    ]
+  ],
+  "bytes": 157964,
+  "downloadBytes": 2325658
+}

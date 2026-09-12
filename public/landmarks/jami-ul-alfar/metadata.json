@@ -1,0 +1,44 @@
+{
+  "name": "Jami Ul-Alfar Mosque (Red Mosque)",
+  "position": [
+    -715,
+    0,
+    -1265
+  ],
+  "rotation": 0,
+  "mask": [
+    -740,
+    1290,
+    -690,
+    1240
+  ],
+  "description": "1908 Indo-Saracenic candy-striped red and white brick jewel in Pettah with horseshoe arch entrance, twin soaring minarets, clock tower, and pomegranate onion domes.",
+  "reference": "Second Cross Street, Pettah, Colombo 11",
+  "id": "jami-ul-alfar",
+  "files": [
+    "jami-ul-alfar.blend",
+    "jami-ul-alfar.glb",
+    "map.glb",
+    "preview.png",
+    "preview.jpg",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
+  "triangles": 25709,
+  "mapTriangles": 21453,
+  "bounds": [
+    [
+      -14.284905433654785,
+      -21.2849063873291,
+      0.0
+    ],
+    [
+      14.284905433654785,
+      21.0,
+      36.5
+    ]
+  ],
+  "bytes": 162068,
+  "downloadBytes": 3595533
+}

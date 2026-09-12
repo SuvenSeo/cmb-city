@@ -1,11 +1,16 @@
 """Compress web meshes and assemble redistributable model download packages.
 Run after Blender export: python3 scripts/package_landmarks.py
 """
-import json, subprocess, zipfile, struct, re
+import json, subprocess, zipfile, struct, re, shutil, os
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'public/landmarks'
-PACK=ROOT/'node_modules/.bin/gltfpack'
+if os.name == 'nt':
+    # .cmd shims are not valid Win32 applications for CreateProcess; invoke the
+    # Node CLI entry point directly so packaging works on Windows too.
+    PACK_CMD=[shutil.which('node') or 'node', str(ROOT/'node_modules/gltfpack/cli.js')]
+else:
+    PACK_CMD=[str(ROOT/'node_modules/.bin/gltfpack')]
 catalog=json.loads((OUT/'catalog.json').read_text())
 for item in catalog:
     dest=OUT/item['id'];original=dest/'map.glb';packed=dest/'map-packed.glb'
@@ -15,7 +20,7 @@ for item in catalog:
     if 'EXT_meshopt_compression' not in header.get('extensionsUsed',[]):
         # The Museum's repeated archivolts use a separate city LOD; full sources stay intact.
         simplify=['-si','0.4','-se','0.001','-sp'] if item['id']=='museum' else []
-        subprocess.run([str(PACK),'-i',str(original),'-o',str(packed),'-cc','-ce','ext','-vp','16','-vn','12','-km','-ke',*simplify],check=True)
+        subprocess.run([*PACK_CMD,'-i',str(original),'-o',str(packed),'-cc','-ce','ext','-vp','16','-vn','12','-km','-ke',*simplify],check=True)
         packed.replace(original)
     item['bytes']=original.stat().st_size
     with original.open('rb') as f:

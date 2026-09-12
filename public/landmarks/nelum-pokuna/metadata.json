@@ -1,0 +1,44 @@
+{
+  "name": "Nelum Pokuna Mahinda Rajapaksa Theatre",
+  "position": [
+    554,
+    0,
+    1803
+  ],
+  "rotation": 0,
+  "mask": [
+    494,
+    -1753,
+    614,
+    -1853
+  ],
+  "description": "Auditorium designed in the shape of an 8-petaled stylized lotus pond inspired by the 12th-century Nelum Pokuna in Polonnaruwa, with concentric stepped tiers, white curved petal shells, and reflection pools.",
+  "reference": "Nelum Pokuna Mawatha, Cinnamon Gardens, Colombo 07",
+  "id": "nelum-pokuna",
+  "files": [
+    "nelum-pokuna.blend",
+    "nelum-pokuna.glb",
+    "map.glb",
+    "preview.png",
+    "preview.jpg",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
+  "triangles": 4300,
+  "mapTriangles": 4300,
+  "bounds": [
+    [
+      -62.0,
+      -54.0,
+      0.0
+    ],
+    [
+      62.0,
+      54.0,
+      28.799999237060547
+    ]
+  ],
+  "bytes": 40768,
+  "downloadBytes": 1994058
+}

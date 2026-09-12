@@ -16,8 +16,17 @@
     "description": "69-level vertical tower, stepped leaning leg, diagonal concrete frame, garden terraces, retail podium and sky garden.",
     "reference": "https://www.safdiearchitects.com/projects/altair-residences",
     "id": "altair",
-    "triangles": 67996,
-    "mapTriangles": 40132,
+    "files": [
+      "altair.blend",
+      "altair.glb",
+      "map.glb",
+      "preview.png",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
+    "triangles": 73492,
+    "mapTriangles": 45628,
     "bounds": [
       [
         -61.5,
@@ -30,8 +39,8 @@
         240.89999389648438
       ]
     ],
-    "bytes": 384836,
-    "downloadBytes": 3628077
+    "bytes": 416868,
+    "downloadBytes": 4562834
   },
   {
     "name": "World Trade Center",
@@ -50,6 +59,15 @@
     "description": "Twin curved office towers with 39 tower levels, a four-level podium, articulated glass panels, stone bands and an entrance canopy.",
     "reference": "https://wtc.lk/about/",
     "id": "wtc",
+    "files": [
+      "wtc.blend",
+      "wtc.glb",
+      "map.glb",
+      "preview.png",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
     "triangles": 108936,
     "mapTriangles": 71400,
     "bounds": [
@@ -61,11 +79,11 @@
       [
         53.0,
         32.5,
-        153.60000610351562
+        152.60000610351562
       ]
     ],
-    "bytes": 778728,
-    "downloadBytes": 4072467
+    "bytes": 781396,
+    "downloadBytes": 5200316
   },
   {
     "name": "Gangaramaya Temple",
@@ -84,6 +102,15 @@
     "description": "Main land-based temple compound with an ornate white gateway, gilded roof trim, dagoba, Bodhi enclosure and a terraced sculpture court.",
     "reference": "https://gangaramaya.com/about-us/",
     "id": "gangaramaya",
+    "files": [
+      "gangaramaya.blend",
+      "gangaramaya.glb",
+      "map.glb",
+      "preview.png",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
     "triangles": 56487,
     "mapTriangles": 42898,
     "bounds": [
@@ -93,13 +120,13 @@
         0.0
       ],
       [
-        37.16999816894531,
+        37.16724395751953,
         43.0,
         17.799999237060547
       ]
     ],
-    "bytes": 240280,
-    "downloadBytes": 3402730
+    "bytes": 240316,
+    "downloadBytes": 3943507
   },
   {
     "name": "Colombo Fort Station",
@@ -145,8 +172,8 @@
         16.275001525878906
       ]
     ],
-    "bytes": 512092,
-    "downloadBytes": 8192297
+    "bytes": 512720,
+    "downloadBytes": 9763979
   },
   {
     "name": "Colombo National Museum",
@@ -179,7 +206,7 @@
     ],
     "interiors": true,
     "triangles": 307788,
-    "mapTriangles": 56063,
+    "mapTriangles": 56059,
     "bounds": [
       [
         -39.0,
@@ -189,10 +216,10 @@
       [
         39.0,
         52.5,
-        15.690350532531738
+        15.672706604003906
       ]
     ],
-    "bytes": 529656,
-    "downloadBytes": 11830668
+    "bytes": 529728,
+    "downloadBytes": 15369916
   }
 ]

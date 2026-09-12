@@ -2,6 +2,12 @@ import {Vector3} from 'three';
 
 export const STUDIO_DIRECTIONS = {
   lotus:[1,.5,1],altair:[1,.65,1],wtc:[1,.65,-1],gangaramaya:[.5,.65,1],fort:[.3,.7,1],museum:[.25,.45,-1],
+  'jami-ul-alfar':[.8,.5,1],
+  'old-parliament':[.7,.5,1],
+  'independence-hall':[1,.65,1],
+  'town-hall':[.8,.55,1],
+  'galle-face-hotel':[.8,.6,1],
+  'clock-tower':[.9,.45,1],
 };
 export const INTERIOR_CAMERAS = {
   fort:{position:[-47,2.9,29],target:[-18,3,20]},
@@ -16,7 +22,7 @@ export function boxCorners(box){
 
 // Solve the frustum constraints for every corner, including depth, instead of
 // giving flat buildings and tall towers a shared fixed camera distance.
-export function fittedView(box,aspect,fov,direction,padding=1.16){
+export function fittedView(box,aspect,fov,direction=[1,.6,1],padding=1.16){
   const target=box.getCenter(new Vector3()),forward=new Vector3(...direction).normalize();
   const right=new Vector3(0,1,0).cross(forward).normalize(),up=forward.clone().cross(right).normalize();
   const tanV=Math.tan(fov*Math.PI/360),tanH=tanV*aspect;

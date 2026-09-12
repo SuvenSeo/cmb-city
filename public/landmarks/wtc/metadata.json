@@ -15,6 +15,15 @@
   "description": "Twin curved office towers with 39 tower levels, a four-level podium, articulated glass panels, stone bands and an entrance canopy.",
   "reference": "https://wtc.lk/about/",
   "id": "wtc",
+  "files": [
+    "wtc.blend",
+    "wtc.glb",
+    "map.glb",
+    "preview.png",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
   "triangles": 108936,
   "mapTriangles": 71400,
   "bounds": [
@@ -26,9 +35,9 @@
     [
       53.0,
       32.5,
-      153.60000610351562
+      152.60000610351562
     ]
   ],
-  "bytes": 778728,
-  "downloadBytes": 4072467
+  "bytes": 781396,
+  "downloadBytes": 5200316
 }

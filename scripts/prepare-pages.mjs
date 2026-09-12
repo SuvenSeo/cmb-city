@@ -5,7 +5,8 @@ import path from 'node:path';
 const root = path.resolve(import.meta.dirname, '..');
 const dist = path.join(root, 'dist');
 const staging = path.join(root, '.cloudflare-build');
-const maxSize = 25 * 1024 * 1024;
+const maxSize = 20 * 1024 * 1024;
+const chunkSize = 18 * 1024 * 1024;
 const assets = {};
 await rm(staging, { recursive: true, force: true });
 await mkdir(staging, { recursive: true });
@@ -18,11 +19,23 @@ async function prepare(directory) {
     if (size <= maxSize) continue;
     const relative = path.relative(dist, filename).split(path.sep).join('/');
     if (!/\.(glb|zip)$/.test(relative)) throw new Error(`Unexpected oversized Pages asset: ${relative}`);
-    const sha256 = createHash('sha256').update(await readFile(filename)).digest('hex');
+    const bytes = await readFile(filename);
+    const sha256 = createHash('sha256').update(bytes).digest('hex');
+
+    const chunks = [];
+    for (let offset = 0, idx = 0; offset < size; offset += chunkSize, idx++) {
+      const length = Math.min(chunkSize, size - offset);
+      const chunkRel = `${relative}.part${idx}`;
+      const chunkBuf = bytes.subarray(offset, offset + length);
+      await writeFile(path.join(dist, chunkRel), chunkBuf);
+      chunks.push({ url: `/${chunkRel}`, offset, length });
+    }
+
     assets[`/${relative}`] = {
       key: `${sha256}/${relative}`, sha256, size,
       contentType: relative.endsWith('.glb') ? 'model/gltf-binary' : 'application/zip',
       ...(relative.endsWith('.zip') ? { filename: path.basename(relative) } : {}),
+      chunks,
     };
     const target = path.join(staging, 'files', relative);
     await mkdir(path.dirname(target), { recursive: true });
@@ -36,4 +49,4 @@ const worker = await readFile(path.join(root, 'cloudflare/large-assets.js'), 'ut
 await writeFile(path.join(dist, '_worker.js'), `${worker}\nexport default createAssetHandler(${JSON.stringify(assets, null, 2)});\n`);
 await writeFile(path.join(dist, '_routes.json'), JSON.stringify({ version: 1, include: Object.keys(assets), exclude: [] }, null, 2));
 await writeFile(path.join(staging, 'assets.json'), JSON.stringify(assets, null, 2));
-console.log(`Pages build ready. ${Object.keys(assets).length} large assets will be served from R2.`);
+console.log(`Pages build ready. ${Object.keys(assets).length} large assets chunked and ready for edge delivery.`);

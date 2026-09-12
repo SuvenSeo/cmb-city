@@ -1,0 +1,44 @@
+{
+  "name": "Colombo Town Hall",
+  "position": [
+    120,
+    0,
+    1220
+  ],
+  "rotation": 0,
+  "mask": [
+    50,
+    -1170,
+    190,
+    -1280
+  ],
+  "description": "Neoclassical civic palace overlooking Viharamahadevi Park with colossal Corinthian hexastyle portico, pediment, rusticated arcades, and high ribbed dome.",
+  "reference": "F. R. Senanayake Mawatha, Cinnamon Gardens, Colombo 07",
+  "id": "town-hall",
+  "files": [
+    "town-hall.blend",
+    "town-hall.glb",
+    "map.glb",
+    "preview.png",
+    "preview.jpg",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
+  "triangles": 58754,
+  "mapTriangles": 47714,
+  "bounds": [
+    [
+      -51.0,
+      -47.59059143066406,
+      0.0
+    ],
+    [
+      51.0,
+      27.0,
+      39.604000091552734
+    ]
+  ],
+  "bytes": 326200,
+  "downloadBytes": 3471501
+}

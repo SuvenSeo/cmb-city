@@ -76,7 +76,15 @@ const shader = {
         float radius = length(local), ring = radius - age * .65;
         float resolved = 1.0 - smoothstep(.3, 1.8, length(fwidth(p)));
         slope += normalize(local + .0001) * sin(ring * 38.0) * exp(-abs(ring) * 14.0)
-          * (1.0-age) * rainStrength * .055 * resolved;
+          * (1.0-age) * rainStrength * .08 * resolved;
+        // Second finer ring layer breaks the reflection up in heavy rain.
+        vec2 cell2 = floor(p * 2.0), local2 = fract(p * 2.0) - .5;
+        float seed2 = fract(sin(dot(cell2, vec2(269.5, 183.3))) * 28001.8384);
+        float age2 = fract(time * 2.3 + seed2);
+        float radius2 = length(local2), ring2 = radius2 - age2 * .6;
+        float resolved2 = 1.0 - smoothstep(.2, 1.2, length(fwidth(p * 2.0)));
+        slope += normalize(local2 + .0001) * sin(ring2 * 30.0) * exp(-abs(ring2) * 12.0)
+          * (1.0-age2) * rainStrength * .035 * resolved2;
       }
       vec3 n = normalize(vec3(-slope.x, 1., -slope.y));
       vec3 toEye = cameraPosition - vWaterPosition;
@@ -106,7 +114,7 @@ const shader = {
       float denominator = noH * noH * (a2 - 1.) + 1.;
       float distribution = a2 / (3.14159265 * denominator * denominator);
       float glint = min(8., distribution * .0204 / max(4. * noV, .2));
-      vec3 outgoingLight = mix(body, reflection, fresnel) + sunColor * min(glint, 1.2) * sunIntensity * shadow * .4;
+      vec3 outgoingLight = mix(body, reflection, fresnel) + sunColor * min(glint, 2.0) * sunIntensity * shadow * .65;
       gl_FragColor = vec4(outgoingLight, 1.);
       #include <tonemapping_fragment>
       #include <colorspace_fragment>
@@ -121,7 +129,7 @@ export function createLakeWater(root, scene, environment, small) {
   if (!sources.length) return null;
   const {geometry, level} = lakeGeometry(sources);
   const shore = shorelineField(geometry, small ? 256 : 512);
-  const water = new Reflector(geometry, {shader, textureWidth: small ? 256 : 512, textureHeight: small ? 256 : 512, multisample: 0, clipBias: .0001});
+  const water = new Reflector(geometry, {shader, textureWidth: small ? 512 : 1024, textureHeight: small ? 512 : 1024, multisample: 4, clipBias: .0001});
   water.name = 'Beira Lake · reflected skyline and wind ripples';
   water.rotation.x = -Math.PI / 2;
   water.position.y = level;
@@ -147,10 +155,23 @@ export function createLakeWater(root, scene, environment, small) {
     lastReflection = time; invalid = false; pendingUntil = 0; reflectionCount++;
   };
   return {
-    setWeather(name) {
+    setWeather(name, isNight = false) {
       const weather = WEATHER_PRESETS[name]; if (!weather) return;
       uniforms.rainStrength.value = weather.rain; uniforms.windStrength.value = weather.wind;
-      uniforms.color.value.set('#236f80').lerp(new THREE.Color('#254d60'), weather.darkness);
+      if (isNight) {
+        uniforms.color.value.set('#0a1624').lerp(new THREE.Color('#040810'), weather.darkness);
+      } else {
+        uniforms.color.value.set('#236f80').lerp(new THREE.Color('#254d60'), weather.darkness);
+      }
+      invalid = true;
+    },
+    setNight(isNight, weatherName = 'clear') {
+      const weather = WEATHER_PRESETS[weatherName] || WEATHER_PRESETS.clear;
+      if (isNight) {
+        uniforms.color.value.set('#0a1624').lerp(new THREE.Color('#040810'), weather.darkness);
+      } else {
+        uniforms.color.value.set('#236f80').lerp(new THREE.Color('#254d60'), weather.darkness);
+      }
       invalid = true;
     },
     update(time) {

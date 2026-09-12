@@ -1,0 +1,44 @@
+{
+  "name": "Old Parliament Building",
+  "position": [
+    -1580,
+    0,
+    -180
+  ],
+  "rotation": 0,
+  "mask": [
+    -1660,
+    240,
+    -1490,
+    110
+  ],
+  "description": "1930 Neo-Baroque buff sandstone palace facing Galle Face Green with grand monumental staircase, hexastyle Ionic portico, and central dome.",
+  "reference": "Galle Face North, Fort, Colombo 01",
+  "id": "old-parliament",
+  "files": [
+    "old-parliament.blend",
+    "old-parliament.glb",
+    "map.glb",
+    "preview.png",
+    "preview.jpg",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
+  "triangles": 48900,
+  "mapTriangles": 39156,
+  "bounds": [
+    [
+      -67.0,
+      -32.70000076293945,
+      0.0
+    ],
+    [
+      67.0,
+      23.0,
+      38.84400177001953
+    ]
+  ],
+  "bytes": 257456,
+  "downloadBytes": 3334791
+}

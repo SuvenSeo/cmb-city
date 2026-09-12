@@ -15,8 +15,17 @@
   "description": "69-level vertical tower, stepped leaning leg, diagonal concrete frame, garden terraces, retail podium and sky garden.",
   "reference": "https://www.safdiearchitects.com/projects/altair-residences",
   "id": "altair",
-  "triangles": 67996,
-  "mapTriangles": 40132,
+  "files": [
+    "altair.blend",
+    "altair.glb",
+    "map.glb",
+    "preview.png",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
+  "triangles": 73492,
+  "mapTriangles": 45628,
   "bounds": [
     [
       -61.5,
@@ -29,6 +38,6 @@
       240.89999389648438
     ]
   ],
-  "bytes": 384836,
-  "downloadBytes": 3628077
+  "bytes": 416868,
+  "downloadBytes": 4562834
 }

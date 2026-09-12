@@ -1,0 +1,44 @@
+{
+  "name": "Colombo Port City & Marina",
+  "position": [
+    -1950,
+    0,
+    -350
+  ],
+  "rotation": 0,
+  "mask": [
+    -2060,
+    430,
+    -1840,
+    260
+  ],
+  "description": "Reclaimed maritime peninsula with Port City Marina yacht club, iconic sweeping tensile fabric sail canopy, deep-water pontoon berths with luxury yachts, ocean seawall promenade, and lighthouse beacon.",
+  "reference": "Port City Boulevard, Port City, Colombo 01",
+  "id": "port_city",
+  "files": [
+    "port_city.blend",
+    "port_city.glb",
+    "map.glb",
+    "preview.png",
+    "preview.jpg",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
+  "triangles": 11464,
+  "mapTriangles": 11464,
+  "bounds": [
+    [
+      -98.0,
+      -67.7690658569336,
+      0.0
+    ],
+    [
+      98.0,
+      63.0,
+      32.20000076293945
+    ]
+  ],
+  "bytes": 80340,
+  "downloadBytes": 1843934
+}

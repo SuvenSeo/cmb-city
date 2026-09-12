@@ -15,6 +15,15 @@
   "description": "Main land-based temple compound with an ornate white gateway, gilded roof trim, dagoba, Bodhi enclosure and a terraced sculpture court.",
   "reference": "https://gangaramaya.com/about-us/",
   "id": "gangaramaya",
+  "files": [
+    "gangaramaya.blend",
+    "gangaramaya.glb",
+    "map.glb",
+    "preview.png",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
   "triangles": 56487,
   "mapTriangles": 42898,
   "bounds": [
@@ -24,11 +33,11 @@
       0.0
     ],
     [
-      37.16999816894531,
+      37.16724395751953,
       43.0,
       17.799999237060547
     ]
   ],
-  "bytes": 240280,
-  "downloadBytes": 3402730
+  "bytes": 240316,
+  "downloadBytes": 3943507
 }

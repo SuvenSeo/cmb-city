@@ -3,24 +3,30 @@ import {WEATHER_PRESETS} from './weatherPresets.js';
 
 export const ENVIRONMENTS = {
   morning: {
-    label: 'Morning', hour: 7.1, sun: '#ffe2bc', intensity: 1.9, exposure: .88,
-    fogRange: 5200, fog: '#d1d7d4', ambient: 1.05, environment: .55,
+    label: 'Morning', hour: 7.1, sun: '#ffe2bc', intensity: 2.8, exposure: 1.02,
+    fogRange: 5200, fog: '#d1d7d4', ambient: 0.8, environment: .75,
     zenith: '#729fc2', horizon: '#e9dfce', ground: '#919989', shadowStrength: .6,
   },
   daylight: {
-    label: 'Soft daylight', hour: 9.8, sun: '#fff1d9', intensity: 2.1, exposure: .86,
-    fogRange: 5500, fog: '#cbd8db', ambient: 1.0, environment: .55,
+    label: 'Soft daylight', hour: 9.8, sun: '#fff1d9', intensity: 3.0, exposure: 1.0,
+    fogRange: 5500, fog: '#cbd8db', ambient: 0.75, environment: .8,
     zenith: '#92b6c9', horizon: '#dce5e3', ground: '#919989', shadowStrength: .62,
   },
   golden: {
-    label: 'Golden hour', hour: 16.5, sun: '#ffd1a0', intensity: 2.2, exposure: .92,
-    fogRange: 5000, fog: '#d9c9b7', ambient: 1.05, environment: .5,
+    label: 'Golden hour', hour: 16.5, sun: '#ffd1a0', intensity: 3.0, exposure: 1.0,
+    fogRange: 5000, fog: '#d9c9b7', ambient: 0.8, environment: .7,
     zenith: '#a5b9c5', horizon: '#f0d9ba', ground: '#a0937e', shadowStrength: .58,
   },
   overcast: {
-    label: 'Cloudy day', hour: 10, sun: '#e6eef0', intensity: .65, exposure: .93,
-    fogRange: 4000, fog: '#beced2', ambient: 1.65, environment: .6,
-    zenith: '#aebfc6', horizon: '#d5dedc', ground: '#91998e', shadowStrength: .28,
+    label: 'Cloudy day', hour: 10, sun: '#e6eef0', intensity: .8, exposure: .95,
+    fogRange: 4000, fog: '#beced2', ambient: 1.0, environment: .6,
+    zenith: '#aebfc6', horizon: '#d5dedc', ground: '#91998e', shadowStrength: .3,
+  },
+  night: {
+    label: 'Colombo Night', hour: 17.2, sun: '#7ba9e0', intensity: .75, exposure: 1.18,
+    fogRange: 6000, fog: '#09101d', ambient: .58, environment: .55,
+    zenith: '#060a17', horizon: '#12203d', ground: '#09101b', shadowStrength: .38,
+    isNight: true,
   },
 };
 
@@ -101,6 +107,14 @@ export function createEnvironment(scene, renderer, small) {
         vec3 cloudLight=mix(underside,top,clamp(.24+detail*.8-thickness*.15+rim*2.0,0.0,1.0));
         cloudLight+=sunColor*rim*.8*(1.0-darkness);
         light=mix(light,cloudLight,mask);
+        // Atmospheric stars in clear night skies
+        if(ray.y > .03) {
+          float starHash = hash(floor(ray.xy * 650.0) + floor(ray.yz * 650.0));
+          if(starHash > .996) {
+            float twinkle = .7 + .3 * sin(starHash * 400.0);
+            light += vec3(.9, .95, 1.0) * twinkle * (1.0 - mask) * max(0.0, 1.0 - length(light) * 1.8);
+          }
+        }
         // Haze conceals the underside of the cloud plane without a hard seam.
         light=mix(horizon,light,smoothstep(-.02,.11,ray.y));
         light=mix(light,ground*.22,(1.0-smoothstep(-.12,.01,ray.y))*capture);
@@ -119,7 +133,7 @@ export function createEnvironment(scene, renderer, small) {
   const ambient=new THREE.HemisphereLight('#e3edf0','#b7b6a1',1.25);
   const sun=new THREE.DirectionalLight(); sun.castShadow=true;
   sun.shadow.mapSize.setScalar(small?1024:2048);
-  sun.shadow.normalBias=.3; sun.shadow.bias=-.000035; sun.shadow.radius=2;
+  sun.shadow.normalBias=.05; sun.shadow.bias=-.0002; sun.shadow.radius=2;
   Object.assign(sun.shadow.camera,{near:100,far:10000});
   scene.add(ambient,sun,sun.target);
   let preset,weather=WEATHER_PRESETS.clear,lighting='daylight',environmentTarget;
@@ -130,15 +144,23 @@ export function createEnvironment(scene, renderer, small) {
     preset=ENVIRONMENTS[lighting];
     direction.copy(solarDirection(preset.hour));
     uniforms.sunDirection.value.copy(direction); uniforms.sunColor.value.set(preset.sun);
-    uniforms.cloudCover.value=weather.clouds; uniforms.darkness.value=weather.darkness;
-    const fogColor=new THREE.Color(preset.fog).lerp(new THREE.Color(weather.fog),weather.darkness);
+    uniforms.cloudCover.value=preset.isNight?Math.min(weather.clouds, .22):weather.clouds;
+    uniforms.darkness.value=weather.darkness;
+    const baseFog=new THREE.Color(preset.fog);
+    const fogColor=preset.isNight?baseFog.clone().lerp(new THREE.Color('#010307'),weather.darkness*.4):baseFog.lerp(new THREE.Color(weather.fog),weather.darkness);
     scene.fog=new THREE.Fog(fogColor,1800,1800+preset.fogRange*weather.fogScale);
     uniforms.horizon.value.copy(fogColor);
-    uniforms.zenith.value.set(lighting==='golden'?'#6c95b7':'#4d8cc4').lerp(new THREE.Color('#304e69'),weather.darkness);
+    const zenithColor=preset.isNight?new THREE.Color(preset.zenith):(lighting==='golden'?new THREE.Color('#6c95b7'):new THREE.Color('#4d8cc4')).lerp(new THREE.Color('#304e69'),weather.darkness);
+    uniforms.zenith.value.copy(zenithColor);
     uniforms.ground.value.set(preset.ground);
     sun.color.set(preset.sun); sun.intensity=preset.intensity*weather.sun;
     sun.shadow.intensity=preset.shadowStrength*weather.sun;
     baseAmbient=preset.ambient*weather.ambient; ambient.intensity=baseAmbient;
+    if(preset.isNight){
+      ambient.color.set('#3a5c8e');ambient.groundColor.set('#162234');
+    }else{
+      ambient.color.set('#e3edf0');ambient.groundColor.set('#b7b6a1');
+    }
     renderer.toneMappingExposure=preset.exposure*(1-weather.darkness*.12);
     uniforms.capture.value=0; skyCamera.update(renderer,skyScene);
     scene.background=skyTarget.texture; scene.backgroundIntensity=1;

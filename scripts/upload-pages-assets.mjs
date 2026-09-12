@@ -5,7 +5,11 @@ import { spawnSync } from 'node:child_process';
 
 const root = path.resolve(import.meta.dirname, '..');
 const config = JSON.parse(await readFile(path.join(root, 'wrangler.json'), 'utf8'));
-const bucket = config.r2_buckets.find(binding => binding.binding === 'LARGE_ASSETS').bucket_name;
+const bucket = config.r2_buckets?.find(binding => binding.binding === 'LARGE_ASSETS')?.bucket_name;
+if (!bucket) {
+  console.log('No R2 bucket configured. Large assets are served via static chunks in Pages.');
+  process.exit(0);
+}
 const assets = JSON.parse(await readFile(path.join(root, '.cloudflare-build/assets.json'), 'utf8'));
 const wrangler = path.join(root, 'node_modules/wrangler/bin/wrangler.js');
 

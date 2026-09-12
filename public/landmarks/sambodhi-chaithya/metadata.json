@@ -1,0 +1,44 @@
+{
+  "name": "Sambodhi Chaithya \u00b7 Maritime Stupa",
+  "position": [
+    -1720,
+    0,
+    -1180
+  ],
+  "rotation": 0,
+  "mask": [
+    -1760,
+    1210,
+    -1680,
+    1150
+  ],
+  "description": "Iconic 47m high Buddhist maritime stupa perched on a 4-legged parabolic concrete archway spanning Marine Drive with vehicular traffic passing underneath at Colombo Harbour entrance.",
+  "reference": "Marine Drive / Chaitya Road, Colombo Port Entrance, Colombo 01",
+  "id": "sambodhi-chaithya",
+  "files": [
+    "sambodhi-chaithya.blend",
+    "sambodhi-chaithya.glb",
+    "map.glb",
+    "preview.png",
+    "preview.jpg",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
+  "triangles": 4800,
+  "mapTriangles": 4800,
+  "bounds": [
+    [
+      -29.0,
+      -24.0,
+      0.0
+    ],
+    [
+      29.0,
+      24.0,
+      49.290000915527344
+    ]
+  ],
+  "bytes": 38676,
+  "downloadBytes": 1682659
+}

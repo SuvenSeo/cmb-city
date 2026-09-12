@@ -15,8 +15,8 @@ Italianate arcades, fanlight sash windows, rusticated portico, carved capitals, 
 ## Fidelity
 Exterior visual reconstruction from public photographs, mapped footprint context and published building descriptions. Heights, plans, colours and ornament are approximate unless supported by the reference. Selected interiors are reconstructed from visitor photographs. Room dimensions, connections, ornament and sculpture are interpretive; no measured survey or photogrammetry is claimed. See REFERENCES.md for feature-level evidence and limitations. Suitable for city visualization and further refinement; not construction or navigation.
 
-Detailed mesh: 307,788 triangles. Map mesh: 56,063 triangles.
-Dimensions (X / Y / Z in Blender metres): 78.0 / 105.0 / 15.69.
+Detailed mesh: 307,788 triangles. Map mesh: 56,059 triangles.
+Dimensions (X / Y / Z in Blender metres): 78.0 / 105.0 / 15.67.
 
 Reference: https://www.museum.gov.lk/
 Reference photos are not included or embedded as textures. Original geometry and materials are editable; no third-party model is included. Architectural designs and names remain associated with their respective owners. A public redistribution licence has not been assigned to this model package.

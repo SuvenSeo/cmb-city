@@ -15,20 +15,21 @@ function disposeModel(root){
 
 export function createModelStudio(container,onState){
   const scene=new THREE.Scene();scene.background=new THREE.Color('#193640');
-  const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'low-power'});
-  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.88;
-  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.shadowMap.autoUpdate=false;
+  const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
   const canvas=renderer.domElement;canvas.tabIndex=0;canvas.dataset.studio='true';canvas.setAttribute('aria-label','Interactive landmark model. Drag to rotate, pinch or scroll to zoom. Arrow keys rotate; plus and minus zoom.');container.appendChild(canvas);
   const camera=new THREE.PerspectiveCamera(38,1,.005,120);
-  const controls=new OrbitControls(camera,canvas);controls.enableDamping=true;controls.dampingFactor=.12;controls.screenSpacePanning=true;controls.maxPolarAngle=Math.PI*.94;
-  const hemi=new THREE.HemisphereLight('#e2edf1','#515950',1.25);scene.add(hemi);
-  const key=new THREE.DirectionalLight('#fff1d8',2.6);key.position.set(-8,12,10);key.castShadow=true;
-  key.shadow.mapSize.setScalar(matchMedia('(max-width:700px)').matches?512:1024);
-  Object.assign(key.shadow.camera,{left:-9,right:9,top:12,bottom:-9,near:.1,far:45});key.shadow.bias=-.00025;key.shadow.normalBias=.016;scene.add(key);
-  const fill=new THREE.DirectionalLight('#b5d7e3',1.0);fill.position.set(8,6,-8);scene.add(fill);
-  const room=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(renderer);const environment=pmrem.fromScene(room,.04);scene.environment=environment.texture;scene.environmentIntensity=.45;room.dispose();pmrem.dispose();
+  const controls=new OrbitControls(camera,canvas);  controls.enableDamping=true;controls.dampingFactor=.12;controls.screenSpacePanning=true;controls.maxPolarAngle=Math.PI*.495;
+  const hemi=new THREE.HemisphereLight('#e2edf1','#515950',.7);scene.add(hemi);
+  const key=new THREE.DirectionalLight('#fff1d8',3.0);key.position.set(-8,12,10);key.castShadow=true;
+  key.shadow.mapSize.setScalar(matchMedia('(max-width:700px)').matches?1024:2048);
+  Object.assign(key.shadow.camera,{left:-9,right:9,top:12,bottom:-9,near:.1,far:45});key.shadow.bias=-.0002;key.shadow.normalBias=.02;key.shadow.radius=4;scene.add(key);
+  const fill=new THREE.DirectionalLight('#b5d7e3',.8);fill.position.set(8,6,-8);scene.add(fill);
+  const rim=new THREE.DirectionalLight('#e8f2ff',1.6);rim.position.set(2,8,-12);scene.add(rim);
+  const room=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(renderer);const environment=pmrem.fromScene(room,.04);scene.environment=environment.texture;scene.environmentIntensity=.8;room.dispose();pmrem.dispose();
   const ground=new THREE.Mesh(new THREE.PlaneGeometry(36,36),new THREE.ShadowMaterial({opacity:.22}));ground.rotation.x=-Math.PI/2;ground.position.y=-.018;ground.receiveShadow=true;scene.add(ground);
-  const grid=new THREE.GridHelper(16,16,'#557379','#36535c');grid.position.y=-.025;grid.material.transparent=true;grid.material.opacity=.23;scene.add(grid);
+  const grid=new THREE.GridHelper(16,16,'#557379','#36535c');grid.position.y=-.025;grid.material.transparent=true;grid.material.opacity=.1;scene.add(grid);
   const interiorLights=new THREE.Group();scene.add(interiorLights);
   const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   let alive=true,root=null,model=null,bounds=null,scale=1,offset=new THREE.Vector3(),currentMode='exterior',generation=0,abort=null;
@@ -53,7 +54,7 @@ export function createModelStudio(container,onState){
   }
   function resize(){
     const w=container.clientWidth,h=container.clientHeight;if(!w||!h)return;
-    const dpr=Math.min(devicePixelRatio,1.5,Math.sqrt((w<700?450000:900000)/(w*h)));
+    const dpr=Math.min(devicePixelRatio,2,Math.sqrt((w<700?1200000:2500000)/(w*h)));
     renderer.setPixelRatio(dpr);renderer.setSize(w,h);camera.aspect=w/h;
     if(root&&currentMode!=='interior')fit(camera.position.clone().sub(controls.target).normalize().toArray());
     else{camera.updateProjectionMatrix();invalidate();}
@@ -88,7 +89,8 @@ export function createModelStudio(container,onState){
       if(raw.isEmpty()||!Number.isFinite(size.length())){disposeModel(gltf.scene);throw Error('This model has no visible geometry.');}
       scale=10/Math.max(size.x,size.y,size.z);offset.set(-centre.x*scale,-raw.min.y*scale,-centre.z*scale);
       root=new THREE.Group();root.add(gltf.scene);root.scale.setScalar(scale);root.position.copy(offset);
-      root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});scene.add(root);root.updateMatrixWorld(true);bounds=new THREE.Box3().setFromObject(root);
+      const maxAniso=renderer.capabilities.getMaxAnisotropy();
+      root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;for(const m of (Array.isArray(o.material)?o.material:[o.material])){if(!m)continue;for(const value of Object.values(m)){if(value?.isTexture)value.anisotropy=Math.min(8,maxAniso);}}}});scene.add(root);root.updateMatrixWorld(true);bounds=new THREE.Box3().setFromObject(root);
       const lightPositions=next.id==='museum'?[[0,10.9,-26],[0,10.9,-18],[10,9.5,-24],[-10,9.5,-24]]:[[-40,5.9,27],[-14,5.9,26],[20,5.9,26]];
       if(next.interiors)for(const position of lightPositions){const l=new THREE.PointLight('#ffdfb0',60*scale*scale,40*scale,2);l.position.copy(normalized(position));interiorLights.add(l);}
       mode(currentMode);canvas.dataset.ready='true';onState({status:'ready',error:''});

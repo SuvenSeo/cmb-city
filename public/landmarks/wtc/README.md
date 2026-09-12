@@ -12,7 +12,7 @@ Twin curved office towers with 39 tower levels, a four-level podium, articulated
 Exterior visual reconstruction from public photographs, mapped footprint context and published building descriptions. Heights, plans, colours and ornament are approximate unless supported by the reference. No measured survey, interior reconstruction or photogrammetry is claimed. Decorative sculpture is simplified. Suitable for city visualization and further refinement; not construction or navigation.
 
 Detailed mesh: 108,936 triangles. Map mesh: 71,400 triangles.
-Dimensions (X / Y / Z in Blender metres): 106.0 / 83.0 / 153.6.
+Dimensions (X / Y / Z in Blender metres): 106.0 / 83.0 / 152.6.
 
 Reference: https://wtc.lk/about/
 Reference photos are not included or embedded as textures. Original geometry and materials are editable; no third-party model is included. Architectural designs and names remain associated with their respective owners. A public redistribution licence has not been assigned to this model package.

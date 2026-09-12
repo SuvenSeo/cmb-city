@@ -45,17 +45,27 @@ export function createAssetHandler(assets) {
           const cached = await cache.match(cacheKey);
           if (cached) return new Response(cached.body, { headers });
         }
-        const object = await env.LARGE_ASSETS.get(asset.key, range ? { range } : undefined);
-        if (!object) return new Response('Asset not found', { status: 404 });
+        let body;
+        if (env.LARGE_ASSETS) {
+          const object = await env.LARGE_ASSETS.get(asset.key, range ? { range } : undefined);
+          if (!object) return new Response('Asset not found', { status: 404 });
+          body = object.body;
+        } else if (asset.chunks && env.ASSETS) {
+          body = await getChunkedStream(env.ASSETS, url.origin, asset.chunks, range, asset.size);
+          if (!body) return new Response('Asset not found', { status: 404 });
+        } else {
+          return new Response('Asset storage not configured', { status: 503, headers: { 'Retry-After': '30' } });
+        }
+
         if (range) {
           headers.set('Content-Range', `bytes ${range.offset}-${range.offset + range.length - 1}/${asset.size}`);
           headers.set('Content-Length', String(range.length));
         }
-        const response = new Response(object.body, { status: range ? 206 : 200, headers });
+        const response = new Response(body, { status: range ? 206 : 200, headers });
         if (!range && cache) {
           const cached = response.clone();
           cached.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-          context.waitUntil(cache.put(cacheKey, cached).catch(() => {}));
+          context?.waitUntil?.(cache.put(cacheKey, cached).catch(() => {}));
         }
         return response;
       } catch {
@@ -63,6 +73,94 @@ export function createAssetHandler(assets) {
       }
     },
   };
+}
+
+async function getChunkedStream(envAssets, origin, chunks, range, totalSize) {
+  const targetOffset = range ? range.offset : 0;
+  const targetLength = range ? range.length : totalSize;
+  const targetEnd = targetOffset + targetLength;
+
+  const overlapping = chunks.filter(c => {
+    const cEnd = c.offset + c.length;
+    return c.offset < targetEnd && cEnd > targetOffset;
+  });
+  if (!overlapping.length) return null;
+
+  let chunkIdx = 0;
+  let currentReader = null;
+  let currentSkip = 0;
+  let currentRemaining = 0;
+
+  return new ReadableStream({
+    async pull(controller) {
+      while (chunkIdx < overlapping.length) {
+        const chunk = overlapping[chunkIdx];
+        if (!currentReader) {
+          const chunkUrl = new URL(chunk.url, origin).toString();
+          const resp = await envAssets.fetch(new Request(chunkUrl));
+          if (!resp.ok) {
+            controller.error(new Error(`Failed to load asset chunk: ${chunk.url}`));
+            return;
+          }
+          if (resp.body?.getReader) {
+            currentReader = resp.body.getReader();
+          } else {
+            const buf = await resp.arrayBuffer();
+            const chunkData = new Uint8Array(buf);
+            const chunkStartInRequested = Math.max(0, targetOffset - chunk.offset);
+            const chunkEndInRequested = Math.min(chunk.length, targetEnd - chunk.offset);
+            controller.enqueue(chunkData.subarray(chunkStartInRequested, chunkEndInRequested));
+            chunkIdx++;
+            return;
+          }
+          const chunkStartInRequested = Math.max(0, targetOffset - chunk.offset);
+          currentSkip = chunkStartInRequested;
+          const chunkEndInRequested = Math.min(chunk.length, targetEnd - chunk.offset);
+          currentRemaining = chunkEndInRequested - currentSkip;
+        }
+
+        if (currentRemaining <= 0) {
+          currentReader = null;
+          chunkIdx++;
+          continue;
+        }
+
+        const { value, done } = await currentReader.read();
+        if (done) {
+          currentReader = null;
+          chunkIdx++;
+          continue;
+        }
+
+        let chunkData = value;
+        if (currentSkip > 0) {
+          if (chunkData.length <= currentSkip) {
+            currentSkip -= chunkData.length;
+            continue;
+          }
+          chunkData = chunkData.subarray(currentSkip);
+          currentSkip = 0;
+        }
+
+        if (chunkData.length > currentRemaining) {
+          chunkData = chunkData.subarray(0, currentRemaining);
+        }
+
+        currentRemaining -= chunkData.length;
+        controller.enqueue(chunkData);
+
+        if (currentRemaining <= 0) {
+          currentReader = null;
+          chunkIdx++;
+        }
+        return;
+      }
+      controller.close();
+    },
+    cancel(reason) {
+      if (currentReader?.cancel) currentReader.cancel(reason);
+    }
+  });
 }
 
 // Malformed or multipart ranges are ignored; unsatisfiable single ranges return 416.

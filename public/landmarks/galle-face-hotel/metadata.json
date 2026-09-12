@@ -1,0 +1,44 @@
+{
+  "name": "The Galle Face Hotel",
+  "position": [
+    -1354,
+    0,
+    753
+  ],
+  "rotation": 0,
+  "mask": [
+    -1420,
+    -700,
+    -1290,
+    -810
+  ],
+  "description": "1864 Victorian colonial seaside grand hotel on Galle Face with North and South ocean wings, multi-tier verandah loggias, terracotta hipped roofs with gables and dormers, and seafront pool.",
+  "reference": "2 Galle Road, Kollupitiya, Colombo 03",
+  "id": "galle-face-hotel",
+  "files": [
+    "galle-face-hotel.blend",
+    "galle-face-hotel.glb",
+    "map.glb",
+    "preview.png",
+    "preview.jpg",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
+  "triangles": 49884,
+  "mapTriangles": 45756,
+  "bounds": [
+    [
+      -58.0,
+      -36.0,
+      0.0
+    ],
+    [
+      58.0,
+      36.0,
+      23.0
+    ]
+  ],
+  "bytes": 299532,
+  "downloadBytes": 3219743
+}

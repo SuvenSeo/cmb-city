@@ -1,0 +1,530 @@
+[
+  {
+    "name": "Jami Ul-Alfar Mosque (Red Mosque)",
+    "position": [
+      -715,
+      0,
+      -1265
+    ],
+    "rotation": 0,
+    "mask": [
+      -740,
+      1290,
+      -690,
+      1240
+    ],
+    "description": "1908 Indo-Saracenic candy-striped red and white brick jewel in Pettah with horseshoe arch entrance, twin soaring minarets, clock tower, and pomegranate onion domes.",
+    "reference": "Second Cross Street, Pettah, Colombo 11",
+    "id": "jami-ul-alfar",
+    "files": [
+      "jami-ul-alfar.blend",
+      "jami-ul-alfar.glb",
+      "map.glb",
+      "preview.png",
+      "preview.jpg",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
+    "triangles": 25709,
+    "mapTriangles": 21453,
+    "bounds": [
+      [
+        -14.284905433654785,
+        -21.2849063873291,
+        0.0
+      ],
+      [
+        14.284905433654785,
+        21.0,
+        36.5
+      ]
+    ],
+    "bytes": 162068,
+    "downloadBytes": 3595533
+  },
+  {
+    "name": "Old Parliament Building",
+    "position": [
+      -1580,
+      0,
+      -180
+    ],
+    "rotation": 0,
+    "mask": [
+      -1660,
+      240,
+      -1490,
+      110
+    ],
+    "description": "1930 Neo-Baroque buff sandstone palace facing Galle Face Green with grand monumental staircase, hexastyle Ionic portico, and central dome.",
+    "reference": "Galle Face North, Fort, Colombo 01",
+    "id": "old-parliament",
+    "files": [
+      "old-parliament.blend",
+      "old-parliament.glb",
+      "map.glb",
+      "preview.png",
+      "preview.jpg",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
+    "triangles": 48900,
+    "mapTriangles": 39156,
+    "bounds": [
+      [
+        -67.0,
+        -32.70000076293945,
+        0.0
+      ],
+      [
+        67.0,
+        23.0,
+        38.84400177001953
+      ]
+    ],
+    "bytes": 257456,
+    "downloadBytes": 3334791
+  },
+  {
+    "name": "Independence Memorial Hall",
+    "position": [
+      240,
+      0,
+      2580
+    ],
+    "rotation": 0,
+    "mask": [
+      190,
+      -2470,
+      290,
+      -2640
+    ],
+    "description": "Kandyan Royal Audience Hall national monument featuring 60 carved stone pillars with Pekada floral bracket capitals, four-tiered plinth, guardian lions, and double Kandyan terracotta roof.",
+    "reference": "Independence Square, Cinnamon Gardens, Colombo 07",
+    "id": "independence-hall",
+    "files": [
+      "independence-hall.blend",
+      "independence-hall.glb",
+      "map.glb",
+      "preview.png",
+      "preview.jpg",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
+    "triangles": 25728,
+    "mapTriangles": 25728,
+    "bounds": [
+      [
+        -38.75,
+        -34.599998474121094,
+        0.0
+      ],
+      [
+        38.75,
+        24.75,
+        21.200000762939453
+      ]
+    ],
+    "bytes": 157964,
+    "downloadBytes": 2325658
+  },
+  {
+    "name": "Colombo Town Hall",
+    "position": [
+      120,
+      0,
+      1220
+    ],
+    "rotation": 0,
+    "mask": [
+      50,
+      -1170,
+      190,
+      -1280
+    ],
+    "description": "Neoclassical civic palace overlooking Viharamahadevi Park with colossal Corinthian hexastyle portico, pediment, rusticated arcades, and high ribbed dome.",
+    "reference": "F. R. Senanayake Mawatha, Cinnamon Gardens, Colombo 07",
+    "id": "town-hall",
+    "files": [
+      "town-hall.blend",
+      "town-hall.glb",
+      "map.glb",
+      "preview.png",
+      "preview.jpg",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
+    "triangles": 58754,
+    "mapTriangles": 47714,
+    "bounds": [
+      [
+        -51.0,
+        -47.59059143066406,
+        0.0
+      ],
+      [
+        51.0,
+        27.0,
+        39.604000091552734
+      ]
+    ],
+    "bytes": 326200,
+    "downloadBytes": 3471501
+  },
+  {
+    "name": "The Galle Face Hotel",
+    "position": [
+      -1354,
+      0,
+      753
+    ],
+    "rotation": 0,
+    "mask": [
+      -1420,
+      -700,
+      -1290,
+      -810
+    ],
+    "description": "1864 Victorian colonial seaside grand hotel on Galle Face with North and South ocean wings, multi-tier verandah loggias, terracotta hipped roofs with gables and dormers, and seafront pool.",
+    "reference": "2 Galle Road, Kollupitiya, Colombo 03",
+    "id": "galle-face-hotel",
+    "files": [
+      "galle-face-hotel.blend",
+      "galle-face-hotel.glb",
+      "map.glb",
+      "preview.png",
+      "preview.jpg",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
+    "triangles": 49884,
+    "mapTriangles": 45756,
+    "bounds": [
+      [
+        -58.0,
+        -36.0,
+        0.0
+      ],
+      [
+        58.0,
+        36.0,
+        23.0
+      ]
+    ],
+    "bytes": 299532,
+    "downloadBytes": 3219743
+  },
+  {
+    "name": "Fort Light & Clock Tower",
+    "position": [
+      -1480,
+      0,
+      -880
+    ],
+    "rotation": 0,
+    "mask": [
+      -1500,
+      895,
+      -1460,
+      865
+    ],
+    "description": "1857 Victorian ashlar lighthouse and clock tower at Chatham Street crossroads with four-way arched rusticated base, quoined shaft, Roman clock faces, and brass lantern dome.",
+    "reference": "Chatham Street & Janadhipathi Mawatha, Fort, Colombo 01",
+    "id": "clock-tower",
+    "files": [
+      "clock-tower.blend",
+      "clock-tower.glb",
+      "map.glb",
+      "preview.png",
+      "preview.jpg",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
+    "triangles": 14740,
+    "mapTriangles": 14740,
+    "bounds": [
+      [
+        -7.25,
+        -5.5,
+        0.0
+      ],
+      [
+        7.25,
+        5.5,
+        29.0
+      ]
+    ],
+    "bytes": 103708,
+    "downloadBytes": 1982071
+  },
+  {
+    "name": "One Galle Face & Shangri-La Colombo",
+    "position": [
+      -1450,
+      0,
+      20
+    ],
+    "rotation": 0,
+    "mask": [
+      -1560,
+      60,
+      -1340,
+      -40
+    ],
+    "description": "Twin 50-storey glass towers (194m) and Shangri-La Hotel commanding the Galle Face oceanfront with curved retail mall podium, infinity pools, and high-performance reflective curtain walls.",
+    "reference": "1A Centre Road, Galle Face, Colombo 02",
+    "id": "one_galle_face",
+    "files": [
+      "one_galle_face.blend",
+      "one_galle_face.glb",
+      "map.glb",
+      "preview.png",
+      "preview.jpg",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
+    "triangles": 7288,
+    "mapTriangles": 7288,
+    "bounds": [
+      [
+        -74.0,
+        -56.0,
+        0.0
+      ],
+      [
+        74.0,
+        41.0,
+        194.60000610351562
+      ]
+    ],
+    "bytes": 80888,
+    "downloadBytes": 2917433
+  },
+  {
+    "name": "Cinnamon Life \u00b7 City of Dreams",
+    "position": [
+      -1115,
+      0,
+      220
+    ],
+    "rotation": 0,
+    "mask": [
+      -1220,
+      -140,
+      -1010,
+      -290
+    ],
+    "description": "Cecil Balmond\u2019s deconstructivist integrated resort with iconic 28m cantilevered hotel over Beira Lake, diamond diagrid exoskeleton, twin residential towers, and connecting sky bridge.",
+    "reference": "Justice Akbar Mawatha, Slave Island, Colombo 02",
+    "id": "cinnamon_life",
+    "files": [
+      "cinnamon_life.blend",
+      "cinnamon_life.glb",
+      "map.glb",
+      "preview.png",
+      "preview.jpg",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
+    "triangles": 5820,
+    "mapTriangles": 5820,
+    "bounds": [
+      [
+        -84.0,
+        -43.0,
+        0.0
+      ],
+      [
+        84.0,
+        45.0,
+        157.8000030517578
+      ]
+    ],
+    "bytes": 69556,
+    "downloadBytes": 3036665
+  },
+  {
+    "name": "Colombo Port City & Marina",
+    "position": [
+      -1950,
+      0,
+      -350
+    ],
+    "rotation": 0,
+    "mask": [
+      -2060,
+      430,
+      -1840,
+      260
+    ],
+    "description": "Reclaimed maritime peninsula with Port City Marina yacht club, iconic sweeping tensile fabric sail canopy, deep-water pontoon berths with luxury yachts, ocean seawall promenade, and lighthouse beacon.",
+    "reference": "Port City Boulevard, Port City, Colombo 01",
+    "id": "port_city",
+    "files": [
+      "port_city.blend",
+      "port_city.glb",
+      "map.glb",
+      "preview.png",
+      "preview.jpg",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
+    "triangles": 11464,
+    "mapTriangles": 11464,
+    "bounds": [
+      [
+        -98.0,
+        -67.7690658569336,
+        0.0
+      ],
+      [
+        98.0,
+        63.0,
+        32.20000076293945
+      ]
+    ],
+    "bytes": 80340,
+    "downloadBytes": 1843934
+  },
+  {
+    "name": "Sambodhi Chaithya \u00b7 Maritime Stupa",
+    "position": [
+      -1720,
+      0,
+      -1180
+    ],
+    "rotation": 0,
+    "mask": [
+      -1760,
+      1210,
+      -1680,
+      1150
+    ],
+    "description": "Iconic 47m high Buddhist maritime stupa perched on a 4-legged parabolic concrete archway spanning Marine Drive with vehicular traffic passing underneath at Colombo Harbour entrance.",
+    "reference": "Marine Drive / Chaitya Road, Colombo Port Entrance, Colombo 01",
+    "id": "sambodhi-chaithya",
+    "files": [
+      "sambodhi-chaithya.blend",
+      "sambodhi-chaithya.glb",
+      "map.glb",
+      "preview.png",
+      "preview.jpg",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
+    "triangles": 4800,
+    "mapTriangles": 4800,
+    "bounds": [
+      [
+        -29.0,
+        -24.0,
+        0.0
+      ],
+      [
+        29.0,
+        24.0,
+        49.290000915527344
+      ]
+    ],
+    "bytes": 38676,
+    "downloadBytes": 1682659
+  },
+  {
+    "name": "Nelum Pokuna Mahinda Rajapaksa Theatre",
+    "position": [
+      554,
+      0,
+      1803
+    ],
+    "rotation": 0,
+    "mask": [
+      494,
+      -1753,
+      614,
+      -1853
+    ],
+    "description": "Auditorium designed in the shape of an 8-petaled stylized lotus pond inspired by the 12th-century Nelum Pokuna in Polonnaruwa, with concentric stepped tiers, white curved petal shells, and reflection pools.",
+    "reference": "Nelum Pokuna Mawatha, Cinnamon Gardens, Colombo 07",
+    "id": "nelum-pokuna",
+    "files": [
+      "nelum-pokuna.blend",
+      "nelum-pokuna.glb",
+      "map.glb",
+      "preview.png",
+      "preview.jpg",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
+    "triangles": 4300,
+    "mapTriangles": 4300,
+    "bounds": [
+      [
+        -62.0,
+        -54.0,
+        0.0
+      ],
+      [
+        62.0,
+        54.0,
+        28.799999237060547
+      ]
+    ],
+    "bytes": 40768,
+    "downloadBytes": 1994058
+  },
+  {
+    "name": "Colombo Harbour & Container Terminals",
+    "position": [
+      -1450,
+      0,
+      -1850
+    ],
+    "rotation": 0,
+    "mask": [
+      -1600,
+      1950,
+      -1300,
+      1750
+    ],
+    "description": "Colombo Port deepwater container quay with towering 75m Ship-to-Shore (STS) gantry cranes, rail tracks, colorful intermodal container stacks, and moored container cargo vessel.",
+    "reference": "Colombo Harbour & Jaya Container Terminal, Colombo 01",
+    "id": "harbour-cranes",
+    "files": [
+      "harbour-cranes.blend",
+      "harbour-cranes.glb",
+      "map.glb",
+      "preview.png",
+      "preview.jpg",
+      "detail.png",
+      "README.md"
+    ],
+    "interiors": false,
+    "triangles": 6824,
+    "mapTriangles": 6824,
+    "bounds": [
+      [
+        -120.0,
+        -74.05999755859375,
+        0.0
+      ],
+      [
+        120.0,
+        45.0,
+        72.08489227294922
+      ]
+    ],
+    "bytes": 86612,
+    "downloadBytes": 2034431
+  }
+]

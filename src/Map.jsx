@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {ArrowUpRight, Building2, Camera, Cloud, CloudDrizzle, CloudLightning, CloudRain, CloudSun, Eye, Maximize, Menu, Pause, Play, RotateCcw, Sun, Sunrise, Sunset, TreePine, Waves, X, Zap} from 'lucide-react';
+import {ArrowUpRight, Building2, Camera, Cloud, CloudDrizzle, CloudLightning, CloudRain, CloudSun, Eye, Maximize, Menu, Moon, Pause, Play, RotateCcw, Sun, Sunrise, Sunset, TreePine, Volume2, VolumeX, Waves, X, Zap} from 'lucide-react';
 import {createMap} from './createMap.js';
 import {WEATHER_PRESETS} from './weatherPresets.js';
 import SceneSelect from './SceneSelect.jsx';
@@ -7,11 +7,13 @@ import RadioPlayer from './RadioPlayer.jsx';
 import WeatherBadge from './WeatherBadge.jsx';
 import CityNavigation from './CityNavigation.jsx';
 import CityPlaces from './CityPlaces.jsx';
-import {LANDMARKS} from './landmarks.js';
+import {LANDMARKS, ALL_LANDMARKS} from './landmarks.js';
 import {coordinateLabel} from './cityNavigation.js';
 import ModelLibrary from './ModelLibrary.jsx';
 import LandmarkDetails from './LandmarkDetails.jsx';
 import {LANDMARK_STORIES} from './landmarkStories.js';
+import ExplorationControls from './ExplorationControls.jsx';
+import {createAudioAmbience} from './audioAmbience.js';
 
 const compactQuery = '(max-width: 760px), (max-height: 500px) and (max-width: 1100px)';
 const cameraNames = ['Aerial', 'City overview', 'Lakeside'];
@@ -20,6 +22,7 @@ const lightingOptions = [
   {value:'morning', label:'Morning', description:'A low sun over the lake', icon:Sunrise},
   {value:'daylight', label:'Daylight', description:'Soft sun & natural colors', icon:Sun},
   {value:'golden', label:'Golden hour', description:'A warm, low evening sun', icon:Sunset},
+  {value:'night', label:'Night', description:'A lit skyline under the stars', icon:Moon},
 ];
 const weatherIcons = {clear:CloudSun, cloudy:Cloud, rain:CloudDrizzle, heavy:CloudRain, storm:CloudLightning};
 const weatherOptions = Object.entries(WEATHER_PRESETS).map(([value,preset]) => ({value,...preset,icon:weatherIcons[value]}));
@@ -30,9 +33,9 @@ export default function Map() {
   const [compact,setCompact]=useState(()=>matchMedia(compactQuery).matches);
   const [menuOpen,setMenuOpen]=useState(false),[showTags,setShowTags]=useState(true),[arrived,setArrived]=useState(null);
   const [infoId,setInfoId]=useState(null),[libraryOpen,setLibraryOpen]=useState(false);
-  const infoPlace=LANDMARKS.find(place=>place.id===infoId);
+  const infoPlace=(ALL_LANDMARKS||LANDMARKS).find(place=>place.id===infoId);
   const [landmark,setLandmark]=useState(null);
-  const selectedPlace=LANDMARKS.find(place=>place.id===landmark);
+  const selectedPlace=(ALL_LANDMARKS||LANDMARKS).find(place=>place.id===landmark);
   const [ready, setReady] = useState(false), [progress, setProgress] = useState(0);
   const [error, setError] = useState(''), [camera, setCamera] = useState(0);
   const [trees, setTrees] = useState(true), [metadata, setMetadata] = useState(null);
@@ -43,6 +46,12 @@ export default function Map() {
   const [lightning, setLightning] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [animated, setAnimated] = useState(false);
+  const [explorationMode, setExplorationMode] = useState('orbit');
+  const [walkSpot, setWalkSpot] = useState('galle_face');
+  const [tukData, setTukData] = useState({ speedKmH: 36, tukIndex: 0, totalTuks: 36 });
+  const [tourData, setTourData] = useState({ waypoint: null, index: 0, total: 7, isPaused: false, progress: 0 });
+  const [audioPlaying, setAudioPlaying] = useState(false);
+  const ambienceRef = useRef(null);
   const openLight = useCallback(open => setOpenControl(open ? 'light' : null), []);
   const openWeather = useCallback(open => setOpenControl(open ? 'weather' : null), []);
 
@@ -50,7 +59,8 @@ export default function Map() {
     let active = true;
     setReady(false); setError(''); setProgress(0);
     setLighting('daylight'); setWeather('clear'); setAnimated(false); setTrees(true); setLightning(true); setOpenControl(null);
-    setLandmark(null);
+    setLandmark(null); setExplorationMode('orbit');
+    ambienceRef.current = createAudioAmbience();
     const preference = matchMedia('(prefers-reduced-motion: reduce)');
     const preferenceChanged = () => setReducedMotion(preference.matches);
     preference.addEventListener('change', preferenceChanged);
@@ -66,9 +76,34 @@ export default function Map() {
         onLandmark: id => {if(active){setLandmark(id);setArrived(null);}},
         onArrival: id => active && setArrived(id),
         onView: view => active && navigation.current?.update(view),
+        onModeChange: (m, details) => {
+          if (active) {
+            setExplorationMode(m);
+            if (details?.spot) setWalkSpot(details.spot);
+          }
+        },
+        onTukTukTelemetry: data => active && setTukData(data),
+        onTourTelemetry: data => active && setTourData(data),
+        onEngineAudio: (spd, throt) => {
+          if (active && ambienceRef.current && ambienceRef.current.isPlaying) {
+            ambienceRef.current.updateTukTukEngine(spd, throt);
+          }
+        },
+        onHonkHorn: () => {
+          if (active && ambienceRef.current) {
+            ambienceRef.current.playTukTukHorn();
+          }
+        },
       });
     } catch (failure) { setError(failure.message); }
-    return () => { active = false; preference.removeEventListener('change', preferenceChanged); viewer.current?.dispose(); viewer.current = null; };
+    return () => {
+      active = false;
+      preference.removeEventListener('change', preferenceChanged);
+      ambienceRef.current?.dispose();
+      ambienceRef.current = null;
+      viewer.current?.dispose();
+      viewer.current = null;
+    };
   }, []);
 
   useEffect(()=>{viewer.current?.suspend(libraryOpen);},[libraryOpen]);
@@ -115,6 +150,41 @@ export default function Map() {
     setTrees(!trees);
   }
 
+  function handleModeChange(m, options={}) {
+    setExplorationMode(m);
+    viewer.current?.setMode(m, options);
+  }
+  function handleWalkSpot(spot) {
+    setWalkSpot(spot);
+    viewer.current?.setMode('walk', { spot });
+  }
+  function handleWalkMove(move) {
+    viewer.current?.walkMoveDir(move);
+  }
+  function handleNextTuk() {
+    viewer.current?.nextTukTuk();
+  }
+  function handleTukPerspective(p) {
+    viewer.current?.setTukTukPerspective(p);
+  }
+  function handleTukDriveMode(m) {
+    viewer.current?.setTukTukDriveMode(m);
+  }
+  function handleTukMove(move) {
+    viewer.current?.setTukTukInput(move);
+  }
+  function handleHonk() {
+    ambienceRef.current?.playTukTukHorn();
+  }
+  function handleTourAction(act) {
+    viewer.current?.tourAction(act);
+  }
+  function toggleAmbience() {
+    if (!ambienceRef.current) return;
+    const playing = ambienceRef.current.toggle();
+    setAudioPlaying(playing);
+  }
+
   return <main className={`map${compact?' is-compact':''}`} aria-label="Colombo Map">
     <div className="map-stage" id="map-scene" role="tabpanel" aria-labelledby={camera===null?'landmark-caption':`camera-${camera}`} ref={stage} />
     <div className="map-shade" />
@@ -123,7 +193,24 @@ export default function Map() {
       <button className="map-menu-trigger" ref={menuTrigger} aria-label="Open map menu" aria-haspopup="dialog" aria-controls="map-menu" aria-expanded={menuOpen} onClick={()=>setMenuOpen(true)}><Menu/><span>Menu</span></button>
     </header>
     <CityNavigation ref={navigation} ready={ready} selected={landmark} onSelect={explorePlace} showTags={showTags}/>
-    {ready && !error && <footer className="map-footer">
+    {ready && !error && (
+      <ExplorationControls
+        mode={explorationMode}
+        onModeChange={handleModeChange}
+        walkSpot={walkSpot}
+        onWalkSpotChange={handleWalkSpot}
+        onWalkMove={handleWalkMove}
+        tukData={tukData}
+        onNextTukTuk={handleNextTuk}
+        onTukPerspectiveChange={handleTukPerspective}
+        onTukDriveModeChange={handleTukDriveMode}
+        onTukMove={handleTukMove}
+        onHonkHorn={handleHonk}
+        tourData={tourData}
+        onTourAction={handleTourAction}
+      />
+    )}
+    {ready && !error && explorationMode === 'orbit' && <footer className="map-footer">
       <div className="map-caption">
         <span className="landmark-eyebrow">{selectedPlace?'A CLOSER LOOK':'EXPLORE SRI LANKA'}</span>
         <h1 id="landmark-caption" lang="si">{selectedPlace?.sinhala||'කොළඹ'}</h1>
@@ -160,6 +247,7 @@ export default function Map() {
           <button className="icon-button" onClick={() => {viewer.current?.animate(!animated); setAnimated(!animated);}}
             aria-label={animated ? 'Pause atmosphere' : 'Animate atmosphere'} aria-pressed={animated} disabled={!ready}
             title={animated ? 'Pause atmosphere' : 'Animate atmosphere'}>{animated ? <Pause /> : <Play />}<span className="control-label">{animated?'Pause atmosphere':'Animate atmosphere'}</span></button>
+          <button className="icon-button" onClick={toggleAmbience} aria-label={audioPlaying ? 'Mute soundscape' : 'Play Indian Ocean soundscape'} aria-pressed={audioPlaying} disabled={!ready} title={audioPlaying ? 'Mute Ocean & City Soundscape' : 'Play Indian Ocean Waves & City Soundscape'}><Volume2 /><span className="control-label">{audioPlaying ? 'Mute audio' : 'Soundscape'}</span></button>
           <button className="icon-button" onClick={toggleTrees} aria-label={trees ? 'Hide trees' : 'Show trees'} aria-pressed={trees} disabled={!ready} title="Trees"><TreePine /><span className="control-label">Trees</span></button>
           <button className="icon-button" onClick={fullscreen} aria-label="Toggle fullscreen" title="Fullscreen"><Maximize /><span className="control-label">Fullscreen</span></button>
           <button className="icon-button map-tags-toggle" onClick={()=>setShowTags(!showTags)} aria-label="Show map tags" aria-pressed={showTags}><Eye/><span className="control-label">Map tags</span></button>

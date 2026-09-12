@@ -1,0 +1,44 @@
+{
+  "name": "Colombo Harbour & Container Terminals",
+  "position": [
+    -1450,
+    0,
+    -1850
+  ],
+  "rotation": 0,
+  "mask": [
+    -1600,
+    1950,
+    -1300,
+    1750
+  ],
+  "description": "Colombo Port deepwater container quay with towering 75m Ship-to-Shore (STS) gantry cranes, rail tracks, colorful intermodal container stacks, and moored container cargo vessel.",
+  "reference": "Colombo Harbour & Jaya Container Terminal, Colombo 01",
+  "id": "harbour-cranes",
+  "files": [
+    "harbour-cranes.blend",
+    "harbour-cranes.glb",
+    "map.glb",
+    "preview.png",
+    "preview.jpg",
+    "detail.png",
+    "README.md"
+  ],
+  "interiors": false,
+  "triangles": 6824,
+  "mapTriangles": 6824,
+  "bounds": [
+    [
+      -120.0,
+      -74.05999755859375,
+      0.0
+    ],
+    [
+      120.0,
+      45.0,
+      72.08489227294922
+    ]
+  ],
+  "bytes": 86612,
+  "downloadBytes": 2034431
+}
